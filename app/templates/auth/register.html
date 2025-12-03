@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -9,13 +9,25 @@
             <div class="card">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <h2 class="card-title">Login</h2>
-                        <p class="text-muted">Sign in to your account</p>
+                        <h2 class="card-title">Create Account</h2>
+                        <p class="text-muted">Join our gaming community</p>
                     </div>
 
                     <form method="POST">
                         {{ form.hidden_tag() }}
                         
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control", placeholder="Choose a username") }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <div class="mb-3">
                             {{ form.email.label(class="form-label") }}
                             {{ form.email(class="form-control", placeholder="Enter your email") }}
@@ -30,7 +42,7 @@
 
                         <div class="mb-3">
                             {{ form.password.label(class="form-label") }}
-                            {{ form.password(class="form-control", placeholder="Enter your password") }}
+                            {{ form.password(class="form-control", placeholder="Create a password") }}
                             {% if form.password.errors %}
                                 <div class="text-danger small">
                                     {% for error in form.password.errors %}
@@ -40,9 +52,16 @@
                             {% endif %}
                         </div>
 
-                        <div class="mb-3 form-check">
-                            {{ form.remember_me(class="form-check-input") }}
-                            {{ form.remember_me.label(class="form-check-label") }}
+                        <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                            {% if form.confirm_password.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.confirm_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <div class="d-grid">
@@ -51,8 +70,8 @@
                     </form>
 
                     <div class="text-center mt-3">
-                        <p class="mb-0">Don't have an account? 
-                            <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Register here</a>
+                        <p class="mb-0">Already have an account? 
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Login here</a>
                         </p>
                     </div>
                 </div>
