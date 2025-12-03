@@ -53,32 +53,53 @@ def generate_access_code():
 # ==================== MAIN ROUTES ====================
 @main.route('/')
 def index():
-    # Get all active games
     all_active_games = Game.query.filter_by(is_active=True).order_by(Game.created_at.desc()).all()
     
-    # Group games by category for featured section
+    category_latest_dates = {}
+    
     featured_games_by_category = {}
     for game in all_active_games:
         if game.category not in featured_games_by_category:
             featured_games_by_category[game.category] = []
-        if len(featured_games_by_category[game.category]) < 3:  # Max 3 per category
-            featured_games_by_category[game.category].append(game)
+            category_latest_dates[game.category] = game.created_at
+        
+        featured_games_by_category[game.category].append(game)
+        
+        if game.created_at > category_latest_dates[game.category]:
+            category_latest_dates[game.category] = game.created_at
     
-    # Get popular games
-    popular_games = Game.query.filter_by(is_active=True).limit(6).all()
+    sorted_categories = sorted(
+        featured_games_by_category.items(),
+        key=lambda x: category_latest_dates.get(x[0], datetime.min),
+        reverse=True
+    )
     
-    # Get categories for sidebar
+    ordered_featured_games = dict(sorted_categories)
+    
+    popular_games = Game.query.filter_by(is_active=True).all()
+    
     categories = get_categories()
+    
     categories_with_counts = []
     for category in categories:
+        latest_game = Game.query.filter_by(
+            category=category, 
+            is_active=True
+        ).order_by(Game.created_at.desc()).first()
+        
+        latest_date = latest_game.created_at if latest_game else datetime.utcnow()
+        
         categories_with_counts.append({
             'name': category,
             'count': get_game_count_by_category(category),
+            'latest_date': latest_date,
             'icon': 'cloud' if 'Cloud' in category or 'cloud' in category.lower() else 'fish'
         })
     
+    categories_with_counts.sort(key=lambda x: x['latest_date'], reverse=True)
+    
     return render_template('index.html', 
-                         featured_games_by_category=featured_games_by_category,  # Changed this
+                         featured_games_by_category=ordered_featured_games,
                          popular_games=popular_games,
                          categories=categories_with_counts)
 
