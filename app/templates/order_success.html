@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}Pesanan Berhasil{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Header -->
+            <div class="text-center mb-5">
+                <div class="success-animation mb-4">
+                    <div class="success-circle">
+                        <i class="fas fa-check text-white"></i>
+                    </div>
+                </div>
+                
+                <h1 class="display-4 fw-bold text-success mb-3">Pesanan Berhasil Ditempatkan!</h1>
+                <p class="lead text-muted mb-4">Terima kasih telah berbelanja di GameStore. Pesanan Anda sedang diproses.</p>
+            </div>
+
+            <!-- Order Summary Card -->
+            <div class="card border-0 shadow-lg rounded-3 mb-5">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h3 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-receipt me-2"></i>Detail Pesanan
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-dark rounded-3">
+                                <span class="fw-semibold text-white">ID Pesanan:</span>
+                                <code class="text-primary fw-bold">{{ order.id[:8] }}...</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-dark rounded-3">
+                                <span class="fw-semibold text-white">Total Pembayaran:</span>
+                                <span class="h5 text-success fw-bold mb-0">Rp {{ "{:,.0f}".format(order.total_amount) }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-dark rounded-3">
+                                <span class="fw-semibold text-white">Status:</span>
+                                <span class="badge bg-warning fs-6">{{ order.status|title }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-dark rounded-3">
+                                <span class="fw-semibold text-white">Tanggal Pesanan:</span>
+                                <span class="text-white">{{ order.created_at.strftime('%d %b %Y %H:%M') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="mt-4">
+                        <h5 class="text-white mb-3">Item yang Dipesan:</h5>
+                        <div class="row g-3">
+                            {% for item in order.items %}
+                            <div class="col-12">
+                                <div class="d-flex align-items-center p-3 bg-dark rounded-3">
+                                    <img src="{{ item.game.image_url }}" class="rounded-2 me-3" 
+                                         alt="{{ item.game.title }}" style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <h6 class="text-white mb-1">{{ item.game.title }}</h6>
+                                        <small class="text-muted">{{ item.game.category }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-primary fw-bold">Rp {{ "{:,.0f}".format(item.price) }}</div>
+                                        <small class="text-muted">Qty: {{ item.quantity }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card border-0 shadow-lg rounded-3 mb-5">
+                <div class="card-header bg-info border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-road me-2"></i>Langkah Selanjutnya
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="step-number me-3">
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                          style="width: 40px; height: 40px;">1</span>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-2">Verifikasi Pembayaran</h6>
+                                    <p class="text-muted small mb-0">Tim kami akan memverifikasi bukti transfer Anda (biasanya 1-6 jam)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="step-number me-3">
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                          style="width: 40px; height: 40px;">2</span>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-2">Akses Game</h6>
+                                    <p class="text-muted small mb-0">Setelah terverifikasi, game akan otomatis ditambahkan ke library Anda</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="step-number me-3">
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                          style="width: 40px; height: 40px;">3</span>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-2">Konfirmasi Email</h6>
+                                    <p class="text-muted small mb-0">Anda akan menerima email konfirmasi setelah verifikasi selesai</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="step-number me-3">
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                          style="width: 40px; height: 40px;">4</span>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-2">Mulai Bermain</h6>
+                                    <p class="text-muted small mb-0">Akses dan download game dari library kapan saja</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Information -->
+            <div class="card border-0 shadow-lg rounded-3 mb-5">
+                <div class="card-header bg-warning border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-headset me-2"></i>Butuh Bantuan?
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4 text-center">
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <i class="fas fa-clock fa-2x text-info mb-3"></i>
+                                <h6 class="text-white">Proses Cepat</h6>
+                                <p class="text-muted small mb-0">Verifikasi biasanya selesai dalam 1-6 jam</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <i class="fas fa-envelope fa-2x text-success mb-3"></i>
+                                <h6 class="text-white">Email Support</h6>
+                                <p class="text-muted small mb-0">support@gamestore.com</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <i class="fas fa-comments fa-2x text-primary mb-3"></i>
+                                <h6 class="text-white">Live Chat</h6>
+                                <p class="text-muted small mb-0">Tersedia 24/7 untuk membantu Anda</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center">
+                <div class="d-grid gap-3 d-md-flex justify-content-center">
+                    <a href="{{ url_for('main.library') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 fw-bold">
+                        <i class="fas fa-gamepad me-2"></i>Lihat Library Saya
+                    </a>
+                    <a href="{{ url_for('main.games') }}" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-3">
+                        <i class="fas fa-shopping-bag me-2"></i>Lanjut Belanja
+                    </a>
+                </div>
+                
+                <div class="mt-4">
+                    <small class="text-muted">
+                        Masalah dengan pesanan? <a href="#" class="text-primary">Hubungi Support</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Success Animation */
+.success-animation {
+    position: relative;
+}
+
+.success-circle {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    animation: scaleIn 0.5s ease-out, pulse 2s infinite 0.5s;
+}
+
+.success-circle i {
+    font-size: 3rem;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* Step Number Styling */
+.step-number .badge {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .success-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .success-circle i {
+        font-size: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn, .bg-gradient-primary, .bg-info, .bg-warning {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+    
+    .text-success {
+        color: #000 !important;
+    }
+}
+</style>
+
+<script>
+// Add some interactive elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Add confetti effect on page load
+    setTimeout(() => {
+        createConfetti();
+    }, 1000);
+    
+    // Print order functionality
+    function printOrder() {
+        window.print();
+    }
+    
+    // Add print button event listener if needed
+    const printBtn = document.createElement('button');
+    printBtn.className = 'btn btn-outline-secondary btn-lg px-4 py-2 rounded-3';
+    printBtn.innerHTML = '<i class="fas fa-print me-2"></i>Cetak Pesanan';
+    printBtn.onclick = printOrder;
+    
+    // You can add this button to the action buttons section if needed
+    // document.querySelector('.text-center .d-grid').appendChild(printBtn);
+});
+
+function createConfetti() {
+    const confettiCount = 100;
+    const confettiContainer = document.createElement('div');
+    confettiContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+    `;
+    document.body.appendChild(confettiContainer);
+    
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.cssText = `
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: ${getRandomColor()};
+            top: -10px;
+            left: ${Math.random() * 100}%;
+            animation: fall ${Math.random() * 3 + 2}s linear forwards;
+            border-radius: 2px;
+        `;
+        confettiContainer.appendChild(confetti);
+    }
+    
+    setTimeout(() => {
+        confettiContainer.remove();
+    }, 5000);
+}
+
+function getRandomColor() {
+    const colors = ['#667eea', '#764ba2', '#28a745', '#20c997', '#ffc107', '#fd7e14'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// Add CSS for confetti animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

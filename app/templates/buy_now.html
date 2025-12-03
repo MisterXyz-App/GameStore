@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}Beli Sekarang - {{ game.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.games') }}" class="text-decoration-none">Game</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.game_detail', game_id=game.id) }}" class="text-decoration-none">{{ game.title }}</a></li>
+            <li class="breadcrumb-item active text-primary">Beli Sekarang</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Game Info Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-lg hover-lift">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <img src="{{ game.image_url }}" class="img-fluid rounded-3 mb-4" alt="{{ game.title }}" style="max-height: 300px; width: 100%; object-fit: cover;">
+                        <h3 class="fw-bold text-white mb-2">{{ game.title }}</h3>
+                        <span class="badge bg-primary fs-6 mb-3">{{ game.category }}</span>
+                        
+                        <!-- Price -->
+                        <div class="h1 fw-bold text-primary mb-3">Rp {{ "{:,.0f}".format(game.price) }}</div>
+                        
+                        <!-- Stock Status -->
+                        <div class="alert {% if game.stock > 0 %}alert-success{% else %}alert-danger{% endif %} border-0 rounded-3 mb-0">
+                            <div class="d-flex align-items-center">
+                                <i class="fas {% if game.stock > 0 %}fa-check-circle{% else %}fa-times-circle{% endif %} me-2 fs-5"></i>
+                                <div>
+                                    {% if game.stock > 0 %}
+                                        <strong class="d-block">Stok Tersedia</strong>
+                                        <small class="opacity-75">{{ game.stock }} unit tersisa</small>
+                                    {% else %}
+                                        <strong class="d-block">Stok Habis</strong>
+                                        <small class="opacity-75">Silakan cek kembali nanti</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Game Features -->
+                    <div class="border-top pt-4">
+                        <h6 class="text-white mb-3"><i class="fas fa-star text-warning me-2"></i>Fitur Game</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Metode Berbagi</small>
+                                <strong class="text-white">
+                                    {% if game.share_method == 'cloud_code' %}
+                                        Cloud Code
+                                    {% else %}
+                                        Account
+                                    {% endif %}
+                                </strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Akses</small>
+                                <strong class="text-success">Seumur Hidup</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-bolt me-2"></i>Pembelian Langsung
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" id="purchaseForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Payment Method -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-white mb-3">
+                                <i class="fas fa-credit-card me-2"></i>Metode Pembayaran
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.payment_method(class="form-select form-select-lg bg-dark text-white border-secondary") }}
+                            {% if form.payment_method.errors %}
+                                <div class="text-danger small mt-2">
+                                    {% for error in form.payment_method.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text text-muted mt-2">
+                                Pilih metode pembayaran yang paling nyaman untuk Anda
+                            </div>
+                        </div>
+
+                        <!-- Payment Proof -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-white mb-3">
+                                <i class="fas fa-receipt me-2"></i>Bukti Transfer
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="file-upload-area border-2 border-dashed rounded-3 p-4 text-center bg-dark">
+                                {{ form.proof_image(class="form-control d-none", id="proofImage", required="required") }}
+                                <div id="uploadPlaceholder">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-white">Unggah Bukti Transfer</h6>
+                                    <p class="text-muted small mb-3">Seret file atau klik untuk memilih</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('proofImage').click()">
+                                        <i class="fas fa-folder-open me-2"></i>Pilih File
+                                    </button>
+                                </div>
+                                <div id="filePreview" class="d-none">
+                                    <i class="fas fa-file-invoice fa-3x text-success mb-3"></i>
+                                    <h6 class="text-white" id="fileName">File terpilih</h6>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearFile()">
+                                        <i class="fas fa-times me-2"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
+                            {% if form.proof_image.errors %}
+                                <div class="text-danger small mt-2">
+                                    {% for error in form.proof_image.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text text-muted mt-2">
+                                <strong class="text-warning">Wajib diisi!</strong> Format: JPG, PNG, GIF, PDF (Maks. 5MB)
+                            </div>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="alert alert-warning border-0 rounded-3 mb-4">
+                            <div class="d-flex">
+                                <i class="fas fa-info-circle fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h6 class="alert-heading mb-2">Instruksi Pembayaran</h6>
+                                    <ul class="mb-0 small">
+                                        <li>Transfer <strong class="text-dark">Rp {{ "{:,.0f}".format(game.price) }}</strong> ke metode pembayaran yang dipilih</li>
+                                        <li><strong class="text-dark">Unggah bukti transfer</strong> sebelum menutup halaman ini</li>
+                                        <li>Game akan otomatis ditambahkan ke library setelah verifikasi</li>
+                                        <li>Proses verifikasi biasanya memakan waktu 1-6 jam</li>
+                                        <li>Pastikan nominal transfer sesuai untuk menghindari delay</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        {% if game.stock > 0 %}
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-success btn-lg py-3 fw-bold rounded-3">
+                                <i class="fas fa-bolt me-2"></i>
+                                BELI SEKARANG - Rp {{ "{:,.0f}".format(game.price) }}
+                            </button>
+                            <a href="{{ url_for('main.game_detail', game_id=game.id) }}" class="btn btn-outline-secondary btn-lg py-3">
+                                <i class="fas fa-arrow-left me-2"></i>Kembali ke Detail Game
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-danger border-0 rounded-3 mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-times-circle fa-2x me-3"></i>
+                                <div>
+                                    <h6 class="alert-heading mb-1">Maaf, Stok Habis</h6>
+                                    <p class="mb-0">Game ini sedang tidak tersedia untuk pembelian.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <a href="{{ url_for('main.games') }}" class="btn btn-primary btn-lg py-3">
+                                <i class="fas fa-gamepad me-2"></i>Jelajahi Game Lainnya
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Security Badges -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-dark text-center py-3">
+                        <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                        <small class="text-white">Pembayaran Aman</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-dark text-center py-3">
+                        <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
+                        <small class="text-white">Pengiriman Instan</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-dark text-center py-3">
+                        <i class="fas fa-headset fa-2x text-info mb-2"></i>
+                        <small class="text-white">Support 24/7</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.file-upload-area {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #667eea !important;
+    background: rgba(102, 126, 234, 0.1) !important;
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.form-select, .form-control {
+    border-radius: 0.75rem;
+}
+
+.alert {
+    border-radius: 1rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const proofImage = document.getElementById('proofImage');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const form = document.getElementById('purchaseForm');
+    
+    // File upload handling
+    proofImage.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            fileName.textContent = file.name;
+            uploadPlaceholder.classList.add('d-none');
+            filePreview.classList.remove('d-none');
+        }
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+        const proofImage = document.getElementById('proofImage');
+        
+        if (!proofImage.files || proofImage.files.length === 0) {
+            valid = false;
+            showAlert('Harap unggah bukti transfer terlebih dahulu!', 'danger');
+            e.preventDefault();
+        }
+        
+        if (valid) {
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Drag and drop functionality
+    const uploadArea = document.querySelector('.file-upload-area');
+    
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#667eea';
+        this.style.background = 'rgba(102, 126, 234, 0.2)';
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        this.style.background = '';
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        this.style.background = '';
+        
+        if (e.dataTransfer.files.length) {
+            proofImage.files = e.dataTransfer.files;
+            const event = new Event('change', { bubbles: true });
+            proofImage.dispatchEvent(event);
+        }
+    });
+    
+    // Click to upload
+    uploadArea.addEventListener('click', function() {
+        proofImage.click();
+    });
+});
+
+function clearFile() {
+    const proofImage = document.getElementById('proofImage');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const filePreview = document.getElementById('filePreview');
+    
+    proofImage.value = '';
+    uploadPlaceholder.classList.remove('d-none');
+    filePreview.classList.add('d-none');
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

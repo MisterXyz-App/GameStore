@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Keranjang Belanja{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-white mb-3">
+                <i class="fas fa-shopping-cart me-3"></i>Keranjang Belanja
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Beranda</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.games') }}" class="text-decoration-none">Game</a></li>
+                    <li class="breadcrumb-item active text-primary">Keranjang</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {% if cart_items %}
+    <div class="row g-4">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-gamepad me-2"></i>Item di Keranjang ({{ cart_items|length }})
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    {% for item in cart_items %}
+                    <div class="cart-item p-4 border-bottom border-secondary">
+                        <div class="row align-items-center">
+                            <!-- Game Image -->
+                            <div class="col-md-2">
+                                <img src="{{ item.game.image_url }}" class="img-fluid rounded-3 shadow" alt="{{ item.game.title }}" 
+                                     style="height: 100px; width: 100%; object-fit: cover;">
+                            </div>
+                            
+                            <!-- Game Info -->
+                            <div class="col-md-4">
+                                <h5 class="fw-bold text-white mb-2">{{ item.game.title }}</h5>
+                                <span class="badge bg-primary mb-2">{{ item.game.category }}</span>
+                                
+                                <!-- Stock Information -->
+                                <div class="stock-info">
+                                    {% if item.game.stock < item.quantity %}
+                                    <div class="alert alert-warning border-0 py-1 px-2 mb-2">
+                                        <small>
+                                            <i class="fas fa-exclamation-triangle me-1"></i> 
+                                            Hanya {{ item.game.stock }} tersedia
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <small class="text-muted">
+                                        <i class="fas fa-box me-1"></i> {{ item.game.stock }} tersedia
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Quantity Controls -->
+                            <div class="col-md-3">
+                                <div class="quantity-controls text-center">
+                                    <label class="form-label text-white fw-semibold mb-2">Jumlah:</label>
+                                    <div class="btn-group" role="group">
+                                        <form method="POST" action="{{ url_for('main.update_cart') }}" class="d-inline">
+                                            <input type="hidden" name="game_id" value="{{ item.game.id }}">
+                                            <input type="hidden" name="action" value="decrease">
+                                            <button type="submit" class="btn btn-outline-light btn-sm rounded-start-3" 
+                                                    {% if item.quantity <= 1 %}disabled{% endif %}>
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </form>
+                                        <span class="px-3 py-1 bg-dark text-white fw-bold" style="min-width: 50px; display: inline-block;">
+                                            {{ item.quantity }}
+                                        </span>
+                                        <form method="POST" action="{{ url_for('main.update_cart') }}" class="d-inline">
+                                            <input type="hidden" name="game_id" value="{{ item.game.id }}">
+                                            <input type="hidden" name="action" value="increase">
+                                            <button type="submit" class="btn btn-outline-light btn-sm rounded-end-3" 
+                                                    {% if item.quantity >= item.game.stock %}disabled{% endif %}>
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Price & Actions -->
+                            <div class="col-md-3 text-end">
+                                <div class="h4 text-primary fw-bold mb-2">Rp {{ "{:,.0f}".format(item.total) }}</div>
+                                <small class="text-muted d-block mb-2">
+                                    Rp {{ "{:,.0f}".format(item.game.price) }} per item
+                                </small>
+                                <form method="POST" action="{{ url_for('main.update_cart') }}" class="d-inline">
+                                    <input type="hidden" name="game_id" value="{{ item.game.id }}">
+                                    <input type="hidden" name="action" value="remove">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-3">
+                                        <i class="fas fa-trash me-1"></i>Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Clear Cart Button -->
+                    <div class="p-4">
+                        <form method="POST" action="{{ url_for('main.clear_cart') }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger rounded-3" 
+                                    onclick="return confirm('Hapus semua item dari keranjang?')">
+                                <i class="fas fa-trash me-2"></i>Kosongkan Keranjang
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg rounded-3 sticky-top" style="top: 100px;">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-receipt me-2"></i>Ringkasan Pesanan
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Details -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-white">Subtotal:</span>
+                            <span class="h5 text-primary fw-bold">Rp {{ "{:,.0f}".format(total) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Pajak:</span>
+                            <span class="text-muted">Rp 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Biaya Layanan:</span>
+                            <span class="text-muted">Gratis</span>
+                        </div>
+                        <hr class="border-secondary">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <strong class="text-white fs-5">Total:</strong>
+                            <strong class="h3 text-primary fw-bold">Rp {{ "{:,.0f}".format(total) }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Conditions -->
+                    {% set can_checkout = true %}
+                    {% set out_of_stock_items = [] %}
+                    {% for item in cart_items %}
+                        {% if item.game.stock < item.quantity %}
+                            {% set can_checkout = false %}
+                            {% set _ = out_of_stock_items.append(item.game.title) %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-3">
+                        {% if can_checkout %}
+                        <a href="{{ url_for('main.checkout') }}" class="btn btn-success btn-lg py-3 rounded-3 fw-bold">
+                            <i class="fas fa-credit-card me-2"></i>Lanjut ke Pembayaran
+                        </a>
+                        {% else %}
+                        <div class="alert alert-warning border-0 rounded-3">
+                            <div class="d-flex">
+                                <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                                <div>
+                                    <strong class="d-block">Stok Tidak Cukup</strong>
+                                    <small class="d-block">Beberapa item melebihi stok tersedia:</small>
+                                    <small class="text-muted">{{ out_of_stock_items|join(', ') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary btn-lg py-3 rounded-3" disabled>
+                            <i class="fas fa-times me-2"></i>Tidak Dapat Checkout
+                        </button>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('main.games') }}" class="btn btn-outline-primary btn-lg py-3 rounded-3">
+                            <i class="fas fa-shopping-bag me-2"></i>Lanjut Belanja
+                        </a>
+                    </div>
+
+                    <!-- Security Badges -->
+                    <div class="row g-2 mt-4">
+                        <div class="col-4 text-center">
+                            <div class="p-2 bg-dark rounded-3">
+                                <i class="fas fa-shield-alt text-success d-block mb-1"></i>
+                                <small class="text-white">Aman</small>
+                            </div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="p-2 bg-dark rounded-3">
+                                <i class="fas fa-bolt text-warning d-block mb-1"></i>
+                                <small class="text-white">Instan</small>
+                            </div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="p-2 bg-dark rounded-3">
+                                <i class="fas fa-headset text-info d-block mb-1"></i>
+                                <small class="text-white">Support</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty Cart State -->
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                    <h3 class="text-white mb-3">Keranjang Anda Kosong</h3>
+                    <p class="text-muted mb-4">Tambahkan beberapa game ke keranjang untuk memulai!</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{{ url_for('main.games') }}" class="btn btn-primary btn-lg px-4 py-2 rounded-3">
+                            <i class="fas fa-gamepad me-2"></i>Jelajahi Game
+                        </a>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary btn-lg px-4 py-2 rounded-3">
+                            <i class="fas fa-home me-2"></i>Kembali ke Beranda
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.sticky-top {
+    position: sticky;
+    z-index: 10;
+}
+
+.cart-item {
+    transition: background-color 0.3s ease;
+}
+
+.cart-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.quantity-controls .btn-group {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.quantity-controls span {
+    background: var(--card-bg) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cart-item {
+        padding: 1rem !important;
+    }
+    
+    .cart-item .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .cart-item .row > div:last-child {
+        margin-bottom: 0;
+    }
+    
+    .sticky-top {
+        position: relative;
+        top: 0 !important;
+    }
+}
+
+/* Animation for cart actions */
+@keyframes slideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-100%); }
+}
+
+.cart-item.removing {
+    animation: slideOut 0.3s ease forwards;
+}
+</style>
+
+<script>
+// Add smooth animations for cart actions
+document.addEventListener('DOMContentLoaded', function() {
+    // Remove item animation
+    const removeButtons = document.querySelectorAll('button[value="remove"]');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const cartItem = this.closest('.cart-item');
+            cartItem.classList.add('removing');
+            
+            // Delay form submission for animation
+            e.preventDefault();
+            setTimeout(() => {
+                this.closest('form').submit();
+            }, 300);
+        });
+    });
+    
+    // Quantity change animations
+    const quantityButtons = document.querySelectorAll('button[value="increase"], button[value="decrease"]');
+    quantityButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const button = this;
+            const originalHtml = button.innerHTML;
+            
+            // Show loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            // Revert after 2 seconds (fallback)
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+            }, 2000);
+        });
+    });
+    
+    // Update cart count in navbar
+    function updateCartCount() {
+        fetch('/api/cart-count')
+            .then(response => response.json())
+            .then(data => {
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) {
+                    cartCount.textContent = data.count;
+                }
+            });
+    }
+    
+    // Update cart count after actions
+    const forms = document.querySelectorAll('form[action*="update-cart"], form[action*="clear-cart"]');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            setTimeout(updateCartCount, 500);
+        });
+    });
+});
+
+// Confirm before clearing cart
+document.querySelector('form[action*="clear-cart"]')?.addEventListener('submit', function(e) {
+    if (!confirm('Apakah Anda yakin ingin mengosongkan seluruh keranjang belanja?')) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}Instruksi Pembayaran{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-white mb-3">
+                <i class="fas fa-credit-card me-3"></i>Instruksi Pembayaran
+            </h1>
+            <p class="lead text-muted">Panduan lengkap untuk melakukan pembayaran dengan aman dan mudah</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Payment Methods -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h3 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-wallet me-2"></i>Metode Pembayaran Tersedia
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if payment_methods %}
+                        {% for method in payment_methods %}
+                        <div class="payment-method-card card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark border-secondary py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-1 text-white fw-bold">{{ method.name }}</h4>
+                                        <span class="badge bg-info">{{ method.type|title }}</span>
+                                    </div>
+                                    <span class="badge bg-{% if method.is_active %}success{% else %}secondary{% endif %} fs-6">
+                                        {{ 'Aktif' if method.is_active else 'Tidak Aktif' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Account Information -->
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-dark rounded-3">
+                                            <small class="text-muted d-block mb-1">Nomor Rekening</small>
+                                            <div class="d-flex align-items-center">
+                                                <code class="h5 text-primary fw-bold mb-0 font-monospace">{{ method.account_number }}</code>
+                                                <button class="btn btn-outline-light btn-sm ms-2" 
+                                                        onclick="copyToClipboard('{{ method.account_number }}')">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-dark rounded-3">
+                                            <small class="text-muted d-block mb-1">Nama Pemilik</small>
+                                            <h6 class="text-white fw-bold mb-0">{{ method.account_name }}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- QR Code -->
+                                {% if method.qr_code_url %}
+                                <div class="text-center mb-4">
+                                    <div class="p-4 bg-dark rounded-3">
+                                        <h6 class="text-white mb-3">
+                                            <i class="fas fa-qrcode me-2"></i>Scan QR Code
+                                        </h6>
+                                        <img src="{{ method.qr_code_url }}" alt="QR Code {{ method.name }}" 
+                                             class="img-fluid rounded-3 shadow" style="max-width: 200px;">
+                                        <p class="text-muted small mt-2 mb-0">Scan untuk pembayaran cepat</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Instructions -->
+                                {% if method.instructions %}
+                                <div class="alert alert-info border-0 rounded-3">
+                                    <div class="d-flex">
+                                        <i class="fas fa-info-circle fa-2x text-info me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="alert-heading text-white mb-2">Petunjuk Khusus</h6>
+                                            <p class="text-white mb-0">{{ method.instructions }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Payment Type Badge -->
+                                <div class="text-center">
+                                    <span class="badge bg-primary fs-6 py-2 px-3">
+                                        <i class="fas fa-{{ 'university' if method.type == 'bank_transfer' else 'mobile-alt' if method.type == 'ewallet' else 'qrcode' }} me-2"></i>
+                                        {{ 'Transfer Bank' if method.type == 'bank_transfer' else 'E-Wallet' if method.type == 'ewallet' else 'QRIS' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-credit-card fa-4x text-muted mb-4"></i>
+                        <h3 class="text-white mb-3">Belum Ada Metode Pembayaran</h3>
+                        <p class="text-muted mb-4">Silakan coba lagi nanti atau hubungi tim support kami.</p>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-primary px-4">
+                            <i class="fas fa-home me-2"></i>Kembali ke Beranda
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Information -->
+        <div class="col-lg-4">
+            <!-- Important Notes -->
+            <div class="card border-0 shadow-lg rounded-3 mb-4">
+                <div class="card-header bg-warning border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Penting!
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-money-bill-wave text-success fa-lg me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Transfer Sesuai Jumlah</h6>
+                            <p class="text-muted small mb-0">Pastikan nominal transfer tepat sesuai total pesanan</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-receipt text-info fa-lg me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Sertakan ID Pesanan</h6>
+                            <p class="text-muted small mb-0">Tambahkan ID pesanan di deskripsi transfer</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-camera text-primary fa-lg me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Simpan Bukti Transfer</h6>
+                            <p class="text-muted small mb-0">Screenshot bukti transfer untuk verifikasi</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <i class="fas fa-user-shield text-warning fa-lg me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Verifikasi Manual</h6>
+                            <p class="text-muted small mb-0">Pembayaran diverifikasi manual dalam 1-6 jam</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Time -->
+            <div class="card border-0 shadow-lg rounded-3 mb-4">
+                <div class="card-header bg-info border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-clock me-2"></i>Waktu Proses
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item mb-3">
+                            <div class="d-flex">
+                                <div class="timeline-badge bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 30px; height: 30px;">
+                                    <i class="fas fa-check text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-1">Verifikasi Pembayaran</h6>
+                                    <p class="text-muted small mb-0">1-6 jam kerja</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item mb-3">
+                            <div class="d-flex">
+                                <div class="timeline-badge bg-success rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 30px; height: 30px;">
+                                    <i class="fas fa-bolt text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-1">Pengiriman Game</h6>
+                                    <p class="text-muted small mb-0">Instan setelah verifikasi</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="d-flex">
+                                <div class="timeline-badge bg-warning rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 30px; height: 30px;">
+                                    <i class="fas fa-headset text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-white mb-1">Respons Support</h6>
+                                    <p class="text-muted small mb-0">Maksimal 24 jam</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- After Payment -->
+            <div class="card border-0 shadow-lg rounded-3 mb-4">
+                <div class="card-header bg-success border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-check-circle me-2"></i>Setelah Bayar
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-upload text-primary me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Upload Bukti</h6>
+                            <p class="text-muted small mb-0">Unggah bukti transfer saat checkout</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-envelope text-info me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Tunggu Konfirmasi</h6>
+                            <p class="text-muted small mb-0">Periksa email untuk konfirmasi</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <i class="fas fa-gamepad text-success me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Akses Game</h6>
+                            <p class="text-muted small mb-0">Buka game dari library Anda</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <i class="fas fa-download text-warning me-3 mt-1"></i>
+                        <div>
+                            <h6 class="text-white mb-1">Download Kapan Saja</h6>
+                            <p class="text-muted small mb-0">Akses seumur hidup, download anytime</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Card -->
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                    <h5 class="text-white mb-2">Butuh Bantuan?</h5>
+                    <p class="text-muted small mb-4">Tim support kami siap membantu Anda 24/7</p>
+                    <div class="d-grid gap-2">
+                        <a href="mailto:support@gamestore.com" class="btn btn-primary">
+                            <i class="fas fa-envelope me-2"></i>Email Support
+                        </a>
+                        <a href="{{ url_for('main.games') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Lanjut Belanja
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.payment-method-card {
+    transition: all 0.3s ease;
+}
+
+.payment-method-card:hover {
+    transform: translateY(-5px);
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.timeline-badge {
+    flex-shrink: 0;
+}
+
+.timeline-item {
+    position: relative;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 40px;
+    bottom: -20px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .payment-method-card .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .payment-method-card .row > div:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Copy button animation */
+@keyframes copyPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.copied {
+    animation: copyPulse 0.3s ease;
+}
+</style>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Nomor rekening berhasil disalin!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('Nomor rekening berhasil disalin!', 'success');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Add hover effects to payment method cards
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentCards = document.querySelectorAll('.payment-method-card');
+    paymentCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '';
+        });
+    });
+});
+</script>
+{% endblock %}

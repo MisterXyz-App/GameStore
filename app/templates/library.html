@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}My Library{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold text-white mb-2">
+                        <i class="fas fa-gamepad me-3"></i>My Game Library
+                    </h1>
+                    <p class="text-muted lead">Koleksi game yang telah Anda beli</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ url_for('main.games') }}" class="btn btn-outline-primary px-4 py-2 rounded-3">
+                        <i class="fas fa-shopping-bag me-2"></i>Belanja Game
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if library %}
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Total Game</div>
+                            <div class="h3 fw-bold text-primary">{{ library|length }}</div>
+                            <div class="text-success small">
+                                <i class="fas fa-gamepad me-1"></i>Dalam koleksi
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-primary rounded-3 p-3">
+                                <i class="fas fa-gamepad fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Cloud Code</div>
+                            <div class="h3 fw-bold text-success">{{ library|selectattr('game.share_method', 'equalto', 'cloud_code')|list|length }}</div>
+                            <div class="text-info small">
+                                <i class="fas fa-cloud me-1"></i>Game dengan kode
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-success rounded-3 p-3">
+                                <i class="fas fa-cloud fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Account Access</div>
+                            <div class="h3 fw-bold text-warning">{{ library|selectattr('game.share_method', 'equalto', 'account_access')|list|length }}</div>
+                            <div class="text-warning small">
+                                <i class="fas fa-user me-1"></i>Akses akun
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-warning rounded-3 p-3">
+                                <i class="fas fa-user fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Total Akses</div>
+                            <div class="h3 fw-bold text-danger">{{ library|sum(attribute='download_count') }}</div>
+                            <div class="text-danger small">
+                                <i class="fas fa-download me-1"></i>Semua waktu
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-danger rounded-3 p-3">
+                                <i class="fas fa-download fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div class="row g-4">
+        {% for item in library %}
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift library-card">
+                <div class="position-relative">
+                    <img src="{{ item.game.image_url }}" class="card-img-top" alt="{{ item.game.title }}" style="height: 220px; object-fit: cover; border-radius: 1rem 1rem 0 0;">
+                    <!-- Access Method Badge -->
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-{% if item.game.share_method == 'cloud_code' %}info{% else %}warning{% endif %} rounded-pill py-2 px-3">
+                            <i class="fas fa-{{ 'cloud' if item.game.share_method == 'cloud_code' else 'user' }} me-1"></i>
+                            {{ 'Cloud Code' if item.game.share_method == 'cloud_code' else 'Account' }}
+                        </span>
+                    </div>
+                    <!-- Category Badge -->
+                    <div class="position-absolute bottom-0 start-0 m-3">
+                        <span class="badge bg-dark rounded-pill py-2 px-3">
+                            {{ item.game.category }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body d-flex flex-column p-4">
+                    <h5 class="card-title text-white fw-bold mb-2">{{ item.game.title }}</h5>
+                    <p class="card-text text-muted small flex-grow-1">{{ item.game.description[:100] }}{% if item.game.description|length > 100 %}...{% endif %}</p>
+                    
+                    <!-- Game Details -->
+                    <div class="mb-3">
+                        <div class="row g-2 text-center">
+                            <div class="col-6">
+                                <div class="bg-dark rounded-2 p-2">
+                                    <small class="text-muted d-block">Akses</small>
+                                    <strong class="text-white h6 mb-0">{{ item.download_count }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-dark rounded-2 p-2">
+                                    <small class="text-muted d-block">Dibeli</small>
+                                    <strong class="text-white h6 mb-0">{{ item.purchased_at.strftime('%d/%m/%y') }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="mt-auto">
+                        <a href="{{ url_for('main.download_game', game_id=item.game.id) }}" class="btn btn-primary btn-lg w-100 py-2 rounded-3 fw-semibold">
+                            <i class="fas fa-{{ 'key' if item.game.share_method == 'cloud_code' else 'user' }} me-2"></i>
+                            {{ 'Dapatkan Kode' if item.game.share_method == 'cloud_code' else 'Akses Akun' }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-gamepad fa-4x text-muted mb-3"></i>
+                        <h3 class="text-white">Koleksi Game Anda Kosong</h3>
+                        <p class="text-muted lead">Belilah beberapa game untuk mulai membangun koleksi Anda!</p>
+                    </div>
+                    <a href="{{ url_for('main.games') }}" class="btn btn-primary btn-lg px-4 py-2 rounded-3 fw-semibold">
+                        <i class="fas fa-shopping-bag me-2"></i>Jelajahi Game
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.library-card {
+    transition: all 0.3s ease;
+}
+
+.library-card:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.col-xl-3, .col-lg-4, .col-md-6 {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.col-xl-3:nth-child(2), .col-lg-4:nth-child(2), .col-md-6:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.col-xl-3:nth-child(3), .col-lg-4:nth-child(3), .col-md-6:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.col-xl-3:nth-child(4), .col-lg-4:nth-child(4), .col-md-6:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 1.75rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.hover-lift');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Add loading state to access buttons
+    const accessButtons = document.querySelectorAll('.library-card .btn');
+    accessButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            this.disabled = true;
+            
+            // Revert after 3 seconds (fallback)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 3000);
+        });
+    });
+});
+</script>
+{% endblock %}

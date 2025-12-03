@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, user-scalable=no">
+    <title>GameStore - {% block title %}Selamat Datang{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: #1a1a2e;
+            --accent-color: #00ff88;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navbar {
+            background: rgba(26, 26, 46, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: #ffffff !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            color: var(--accent-color) !important;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            margin: 0 1rem;
+        }
+        
+        .search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: white;
+            padding: 0.5rem 1rem 0.5rem 3rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+            outline: none;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .cart-badge {
+            background: var(--secondary-gradient);
+            font-size: 0.7rem;
+            margin-left: 0.3rem;
+        }
+        
+        .dropdown-menu {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        footer {
+            background: rgba(26, 26, 46, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--secondary-gradient);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            color: var(--accent-color);
+            transform: rotate(180deg);
+        }
+        
+        /* Hamburger Menu Sidebar Styles */
+        .navbar-toggler {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+            z-index: 1050;
+        }
+        
+        .navbar-toggler:hover {
+            border-color: var(--accent-color);
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            width: 1.5em;
+            height: 1.5em;
+        }
+        
+        /* Offcanvas Sidebar dari Kanan */
+        .offcanvas-end {
+            background: var(--card-bg);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            width: 320px !important;
+        }
+        
+        .offcanvas-header {
+            background: rgba(26, 26, 46, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem 1.5rem;
+        }
+        
+        .offcanvas-title {
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-close:hover {
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+        
+        .offcanvas-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        /* Mobile Search Results */
+        .mobile-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .mobile-search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .mobile-search-result-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-search-result-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        /* Scrollbar untuk mobile search results */
+        .mobile-search-results::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .mobile-search-results::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .mobile-search-results::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        
+        /* Mobile Navigation Menu */
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .mobile-nav-item {
+            padding: 0.875rem 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .mobile-nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+            transform: translateX(5px);
+        }
+        
+        .mobile-nav-item.active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+        }
+        
+        .mobile-nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        /* Mobile Dropdown Menu */
+        .mobile-dropdown {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .mobile-dropdown.show {
+            display: block;
+        }
+        
+        .mobile-dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .mobile-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--accent-color);
+            padding-left: 1.25rem;
+        }
+        
+        .mobile-dropdown-item i {
+            font-size: 0.9rem;
+        }
+        
+        .mobile-dropdown-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .mobile-dropdown-toggle::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s ease;
+            margin-left: auto;
+            font-size: 0.9rem;
+        }
+        
+        .mobile-dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+        
+        /* Mobile Search Bar */
+        .mobile-search-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        
+        .mobile-search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: white;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        
+        .mobile-search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 255, 136, 0.25);
+            outline: none;
+        }
+        
+        .mobile-search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Mobile Cart Badge */
+        .mobile-cart-badge {
+            background: var(--secondary-gradient);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            margin-left: auto;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        /* User Section in Mobile Menu */
+        .mobile-user-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .mobile-user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .mobile-user-details {
+            flex: 1;
+        }
+        
+        .mobile-username {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .mobile-user-email {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* Mobile Menu Footer */
+        .mobile-menu-footer {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+        
+        /* Hide desktop elements on mobile */
+        @media (max-width: 991.98px) {
+            .search-container {
+                display: none;
+            }
+            
+            .navbar-nav:not(.mobile-nav) {
+                display: none;
+            }
+            
+            .offcanvas-body {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+        }
+        
+        /* Show desktop elements on larger screens */
+        @media (min-width: 992px) {
+            .navbar-toggler {
+                display: none;
+            }
+            
+            #mobileMenu {
+                display: none;
+            }
+        }
+        
+        /* Mobile menu scrollbar */
+        .offcanvas-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .offcanvas-body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .offcanvas-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        .offcanvas-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Scrollbar untuk desktop search results */
+        .search-results::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .search-results::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .search-results::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="fas fa-gamepad me-2"></i>GameStore
+            </a>
+            
+            <!-- Hamburger Menu Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Desktop Navigation -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.index' }}" href="{{ url_for('main.index') }}">
+                            <i class="fas fa-home me-1"></i>Beranda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.games' }}" href="{{ url_for('main.games') }}">
+                            <i class="fas fa-gamepad me-1"></i>Semua Game
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tags me-1"></i>Kategori
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in get_all_categories() %}
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('main.category_games', category_name=category) }}">
+                                    <i class="fas fa-folder me-2"></i>{{ category }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'main.payment_instructions' }}" href="{{ url_for('main.payment_instructions') }}">
+                            <i class="fas fa-credit-card me-1"></i>Pembayaran
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Cari game..." id="searchInput">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'main.cart' }}" href="{{ url_for('main.cart') }}">
+                                <i class="fas fa-shopping-cart"></i> Keranjang
+                                <span class="badge cart-badge" id="cartCount">
+                                    {{ session.get('cart_count', 0) }}
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'main.library' }}" href="{{ url_for('main.library') }}">
+                                <i class="fas fa-bookmark me-1"></i>Library
+                            </a>
+                        </li>
+                        {% if current_user.is_admin %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>Admin
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.admin_orders') }}"><i class="fas fa-shopping-cart me-2"></i>Pesanan</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.admin_games') }}"><i class="fas fa-gamepad me-2"></i>Game</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.admin_payment_methods') }}"><i class="fas fa-credit-card me-2"></i>Metode Bayar</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('main.library') }}"><i class="fas fa-bookmark me-2"></i>Library Saya</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="fas fa-user me-2"></i>Profil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Keluar</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'auth.login' }}" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Masuk
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'auth.register' }}" href="{{ url_for('auth.register') }}">
+                                <i class="fas fa-user-plus me-1"></i>Daftar
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar Menu -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="mobileMenuLabel">
+                <i class="fas fa-gamepad me-2"></i>GameStore
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <!-- Mobile Search -->
+            <div class="mobile-search-container">
+                <i class="fas fa-search mobile-search-icon"></i>
+                <input type="text" class="mobile-search-input" placeholder="Cari game..." id="mobileSearchInput">
+                <div class="mobile-search-results" id="mobileSearchResults"></div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <nav class="mobile-nav">
+                <a class="mobile-nav-item {{ 'active' if request.endpoint == 'main.index' }}" href="{{ url_for('main.index') }}">
+                    <i class="fas fa-home"></i>Beranda
+                </a>
+                
+                <a class="mobile-nav-item {{ 'active' if request.endpoint == 'main.games' }}" href="{{ url_for('main.games') }}">
+                    <i class="fas fa-gamepad"></i>Semua Game
+                </a>
+                
+                <!-- Categories Dropdown -->
+                <div class="mobile-nav-item mobile-dropdown-toggle" data-bs-toggle="collapse" href="#mobileCategoriesCollapse" role="button">
+                    <i class="fas fa-tags"></i>Kategori
+                </div>
+                <div class="collapse mobile-dropdown" id="mobileCategoriesCollapse">
+                    {% for category in get_all_categories() %}
+                    <a class="mobile-dropdown-item" href="{{ url_for('main.category_games', category_name=category) }}">
+                        <i class="fas fa-folder"></i>{{ category }}
+                    </a>
+                    {% endfor %}
+                </div>
+                
+                <a class="mobile-nav-item {{ 'active' if request.endpoint == 'main.payment_instructions' }}" href="{{ url_for('main.payment_instructions') }}">
+                    <i class="fas fa-credit-card"></i>Pembayaran
+                </a>
+                
+                {% if current_user.is_authenticated %}
+                    <a class="mobile-nav-item {{ 'active' if request.endpoint == 'main.cart' }}" href="{{ url_for('main.cart') }}">
+                        <i class="fas fa-shopping-cart"></i>Keranjang
+                        <span class="mobile-cart-badge" id="mobileCartCount">
+                            {{ session.get('cart_count', 0) }}
+                        </span>
+                    </a>
+                    
+                    <a class="mobile-nav-item {{ 'active' if request.endpoint == 'main.library' }}" href="{{ url_for('main.library') }}">
+                        <i class="fas fa-bookmark"></i>Library
+                    </a>
+                    
+                   {% if current_user.is_admin %}
+    <!-- Admin Dropdown -->
+    <div class="mobile-nav-item mobile-dropdown-toggle" data-bs-toggle="collapse" href="#mobileAdminCollapse" role="button">
+        <i class="fas fa-cog"></i>Admin
+    </div>
+    <div class="collapse mobile-dropdown" id="mobileAdminCollapse">
+        <a class="mobile-dropdown-item" href="{{ url_for('admin.admin_dashboard') }}">
+            <i class="fas fa-tachometer-alt"></i>Dashboard
+        </a>
+        <a class="mobile-dropdown-item" href="{{ url_for('admin.admin_orders') }}">
+            <i class="fas fa-shopping-cart"></i>Pesanan
+        </a>
+        <a class="mobile-dropdown-item" href="{{ url_for('admin.admin_games') }}">
+            <i class="fas fa-gamepad"></i>Game
+        </a>
+        <a class="mobile-dropdown-item" href="{{ url_for('admin.admin_payment_methods') }}">
+            <i class="fas fa-credit-card"></i>Metode Bayar
+        </a>
+        
+        <!-- TAMBAHKAN SETTINGS DI MOBILE DROPDOWN -->
+        <div class="mobile-dropdown-divider"></div>
+        <a class="mobile-dropdown-item" href="{{ url_for('admin.admin_settings') }}">
+            <i class="fas fa-cog"></i>Settings
+        </a>
+    </div>
+{% endif %}
+                {% endif %}
+            </nav>
+            
+            <!-- User Section -->
+            {% if current_user.is_authenticated %}
+            <div class="mobile-user-section">
+                <div class="mobile-user-info">
+                    <div class="mobile-user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="mobile-user-details">
+                        <div class="mobile-username">{{ current_user.username }}</div>
+                        <div class="mobile-user-email">{{ current_user.email }}</div>
+                    </div>
+                </div>
+                
+                <nav class="mobile-nav">
+                    <a class="mobile-nav-item" href="{{ url_for('auth.profile') }}">
+                        <i class="fas fa-user"></i>Profil
+                    </a>
+                    <a class="mobile-nav-item" href="{{ url_for('auth.logout') }}">
+                        <i class="fas fa-sign-out-alt"></i>Keluar
+                    </a>
+                </nav>
+            </div>
+            {% else %}
+            <div class="mobile-user-section">
+                <nav class="mobile-nav">
+                    <a class="mobile-nav-item {{ 'active' if request.endpoint == 'auth.login' }}" href="{{ url_for('auth.login') }}">
+                        <i class="fas fa-sign-in-alt"></i>Masuk
+                    </a>
+                    <a class="mobile-nav-item {{ 'active' if request.endpoint == 'auth.register' }}" href="{{ url_for('auth.register') }}">
+                        <i class="fas fa-user-plus"></i>Daftar
+                    </a>
+                </nav>
+            </div>
+            {% endif %}
+            
+            <!-- Mobile Menu Footer -->
+            <div class="mobile-menu-footer">
+                <p>&copy; 2024 GameStore</p>
+                <p class="text-muted">Versi 1.0.0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+<!--     <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show fade-in">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div> -->
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-3"><i class="fas fa-gamepad me-2"></i>GameStore</h5>
+                    <p class="mb-0 text-muted">Tempat terbaik untuk game digital favorit Anda</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted">&copy; 2024 GameStore. Semua hak dilindungi.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        const mobileSearchResults = document.getElementById('mobileSearchResults');
+        
+        function performSearch(query, isMobile = false) {
+            if (query.length < 2) {
+                if (!isMobile) {
+                    searchResults.style.display = 'none';
+                } else {
+                    mobileSearchResults.style.display = 'none';
+                }
+                return;
+            }
+            
+            fetch(`/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!isMobile) {
+                        // Desktop search results
+                        searchResults.innerHTML = '';
+                        
+                        if (data.length === 0) {
+                            searchResults.innerHTML = '<div class="search-result-item text-muted">Tidak ada game yang ditemukan</div>';
+                        } else {
+                            data.forEach(game => {
+                                const item = document.createElement('div');
+                                item.className = 'search-result-item';
+                                item.innerHTML = `
+                                    <img src="${game.image_url}" alt="${game.title}" class="search-result-image">
+                                    <div>
+                                        <div class="fw-bold">${game.title}</div>
+                                        <small class="text-muted">Rp ${game.price.toLocaleString('id-ID')}</small>
+                                    </div>
+                                `;
+                                item.addEventListener('click', () => {
+                                    window.location.href = game.url;
+                                });
+                                searchResults.appendChild(item);
+                            });
+                        }
+                        
+                        searchResults.style.display = 'block';
+                    } else {
+                        // Mobile search results
+                        mobileSearchResults.innerHTML = '';
+                        
+                        if (data.length === 0) {
+                            mobileSearchResults.innerHTML = '<div class="mobile-search-result-item text-muted">Tidak ada game yang ditemukan</div>';
+                        } else {
+                            data.forEach(game => {
+                                const item = document.createElement('div');
+                                item.className = 'mobile-search-result-item';
+                                item.innerHTML = `
+                                    <img src="${game.image_url}" alt="${game.title}" class="mobile-search-result-image">
+                                    <div>
+                                        <div class="fw-bold">${game.title}</div>
+                                        <small class="text-muted">Rp ${game.price.toLocaleString('id-ID')}</small>
+                                    </div>
+                                `;
+                                item.addEventListener('click', () => {
+                                    window.location.href = game.url;
+                                    // Tutup mobile menu setelah klik
+                                    const mobileMenu = document.getElementById('mobileMenu');
+                                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileMenu);
+                                    if (bsOffcanvas) bsOffcanvas.hide();
+                                });
+                                mobileSearchResults.appendChild(item);
+                            });
+                        }
+                        
+                        mobileSearchResults.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }
+        
+        searchInput.addEventListener('input', function() {
+            performSearch(this.value.trim(), false);
+        });
+        
+        mobileSearchInput.addEventListener('input', function() {
+            performSearch(this.value.trim(), true);
+        });
+        
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            // Untuk desktop
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+            
+            // Untuk mobile
+            if (mobileSearchInput && mobileSearchResults && 
+                !mobileSearchInput.contains(e.target) && !mobileSearchResults.contains(e.target)) {
+                mobileSearchResults.style.display = 'none';
+            }
+        });
+        
+        // Clear search results when pressing Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                searchResults.style.display = 'none';
+                if (mobileSearchResults) {
+                    mobileSearchResults.style.display = 'none';
+                }
+            }
+        });
+        
+        // Update cart count dynamically
+        function updateCartCount() {
+            fetch('/api/cart-count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cartCount').textContent = data.count;
+                    document.getElementById('mobileCartCount').textContent = data.count;
+                })
+                .catch(error => {
+                    console.error('Error updating cart count:', error);
+                });
+        }
+        
+        // Update cart count every 30 seconds
+        setInterval(updateCartCount, 30000);
+        
+        // Add fade-in animation to alerts
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.classList.add('fade-in');
+            });
+            
+            // Close mobile dropdowns when clicking outside on mobile
+            if (window.innerWidth < 992) {
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.mobile-nav-item') && !e.target.closest('.mobile-dropdown')) {
+                        const openDropdowns = document.querySelectorAll('.mobile-dropdown.show');
+                        openDropdowns.forEach(dropdown => {
+                            dropdown.classList.remove('show');
+                        });
+                    }
+                });
+            }
+            
+            // Initialize cart count on page load
+            updateCartCount();
+            
+            // Close mobile search results when menu is closed
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu) {
+                mobileMenu.addEventListener('hidden.bs.offcanvas', function() {
+                    if (mobileSearchResults) {
+                        mobileSearchResults.style.display = 'none';
+                    }
+                    if (mobileSearchInput) {
+                        mobileSearchInput.value = '';
+                    }
+                });
+            }
+        });
+        
+        // Handle mobile menu close on item click
+        document.querySelectorAll('.mobile-nav-item[href], .mobile-dropdown-item[href]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (!this.classList.contains('mobile-dropdown-toggle')) {
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileMenu);
+                    if (bsOffcanvas) {
+                        bsOffcanvas.hide();
+                    }
+                }
+            });
+        });
+        
+        // Handle mobile search input focus
+        if (mobileSearchInput) {
+            mobileSearchInput.addEventListener('focus', function() {
+                // Scroll to search input on mobile
+                if (window.innerWidth < 992) {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

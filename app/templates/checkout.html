@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Checkout</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.payment_method.label(class="form-label") }}
+                            {{ form.payment_method(class="form-select") }}
+                            {% if form.payment_method.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.payment_method.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.proof_image.label(class="form-label") }}
+                            {{ form.proof_image(class="form-control") }}
+                            <div class="form-text">
+                                Upload proof of payment (screenshot of transfer receipt). Max 5MB.
+                            </div>
+                            {% if form.proof_image.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.proof_image.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Payment Instructions:</h6>
+                            <ul class="mb-0">
+                                <li>Transfer the exact amount to the selected payment method</li>
+                                <li>Include your order ID in the transfer description</li>
+                                <li>Upload clear proof of payment</li>
+                                <li>Your order will be processed after verification (1-6 hours)</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Place Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Items ({{ cart_count }}):</span>
+                        <strong class="h5 text-primary">Rp {{ "{:,.0f}".format(total) }}</strong>
+                    </div>
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>Total Amount:</strong>
+                        <strong class="h4 text-primary">Rp {{ "{:,.0f}".format(total) }}</strong>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>What happens next?</h6>
+                        <ol class="small">
+                            <li>Submit your order with payment proof</li>
+                            <li>We verify your payment (1-6 hours)</li>
+                            <li>Games are added to your library</li>
+                            <li>Download and enjoy!</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    <a href="{{ url_for('main.payment_instructions') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-question-circle"></i> View Payment Instructions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

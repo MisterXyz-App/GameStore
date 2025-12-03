@@ -1,0 +1,1170 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if category_name %}{{ category_name }} - GameStore{% else %}Semua Game - GameStore{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section Games -->
+<section class="hero-games py-5 position-relative overflow-hidden">
+    <div class="container position-relative z-1">
+        <div class="row min-vh-30 align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    {% if category_name %}
+                    <div class="category-badge mb-3">
+                        <div class="d-inline-flex align-items-center bg-gradient-primary bg-opacity-10 px-3 py-1 rounded-pill">
+                            <i class="fas fa-{% if 'Cloud' in category_name or 'cloud' in category_name.lower() %}cloud{% else %}fish{% endif %} me-2"></i>
+                            <span class="fw-semibold">{{ category_name }}</span>
+                        </div>
+                    </div>
+                    <h1 class="hero-title text-white mb-3 fw-bold">
+                        <span class="text-gradient-primary">{{ category_name }}</span> Kategori
+                    </h1>
+                    <p class="hero-subtitle text-light mb-4">
+                        Temukan koleksi lengkap <b>{{ category_name|lower }}</b> premium dengan kualitas terbaik dan harga terjangkau.
+                    </p>
+                    {% else %}
+                    <div class="d-inline-flex align-items-center bg-gradient-primary bg-opacity-10 px-3 py-1 rounded-pill mb-3">
+                        <span class="hero-badge me-2">🎮</span>
+                        <small class="text-primary fw-semibold">Koleksi Lengkap</small>
+                    </div>
+                    <h1 class="hero-title text-white mb-3 fw-bold">
+                        Jelajahi <span class="text-gradient-primary">Semua Game</span>
+                    </h1>
+                    <p class="hero-subtitle text-light mb-4">
+                        Temukan game digital terbaik untuk semua platform dengan garansi 100% aman dan pengiriman instan.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+           <!--  <div class="col-lg-6">
+                <div class="games-hero-visual position-relative">
+                    <div class="floating-games">
+                        <div class="game-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); top: 20%; left: 10%; animation-delay: 0s;">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="game-icon" style="background: linear-gradient(135deg, #17a2b8, #6f42c1); top: 60%; right: 10%; animation-delay: 1s;">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="game-icon" style="background: linear-gradient(135deg, #28a745, #20c997); bottom: 20%; left: 40%; animation-delay: 2s;">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    
+    <!-- Animated Background -->
+    <div class="games-hero-bg">
+        <div class="game-circle circle-1"></div>
+        <div class="game-circle circle-2"></div>
+        <div class="game-circle circle-3"></div>
+    </div>
+</section>
+
+<!-- Games Content -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Filters - Modern Design -->
+            <div class="col-lg-3 mb-4 mb-lg-0">
+                <div class="sticky-sidebar-games">
+                    <!-- Filter Card -->
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                        <div class="card-header border-0 py-3 position-relative overflow-hidden">
+                            <div class="filter-header-bg"></div>
+                            <div class="position-relative z-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-wrapper bg-white bg-opacity-20 rounded-3 p-2 me-3">
+                                        <i class="fas fa-filter text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0 text-white fw-bold">Filter & Kategori</h5>
+                                        <small class="text-white text-opacity-75">Saring hasil pencarian</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body p-4">
+                            <!-- Search Form -->
+                            <form method="GET" action="{{ url_for('main.games') }}" class="mb-4">
+                                <div class="input-group search-group rounded-3">
+                                    <span class="input-group-text bg-dark border-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control bg-dark border-0 text-white" 
+                                           placeholder="Cari game..." 
+                                           value="{{ request.args.get('search', '') }}"
+                                           style="outline: none; box-shadow: none;">
+                                    <button class="btn btn-primary rounded-end" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Categories -->
+                            <div class="mb-4">
+                                <h6 class="text-white mb-3 fw-bold">
+                                    <i class="fas fa-tags me-2"></i>Kategori
+                                </h6>
+                                <div class="categories-list">
+                                    <a href="{{ url_for('main.games') }}" 
+                                       class="category-filter-item d-flex align-items-center justify-content-between px-3 py-2 rounded-3 mb-2 text-decoration-none {% if not current_category %}active-filter{% endif %}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="category-icon-sm me-3">
+                                                <div class="icon-wrapper-xs rounded-2 p-2" style="background: rgba(102, 126, 234, 0.2);">
+                                                    <i class="fas fa-box text-primary"></i>
+                                                </div>
+                                            </div>
+                                            <span class="text-white fw-medium">Semua Kategori</span>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">{{ games|length if not current_category else '' }}</span>
+                                    </a>
+                                    
+                                    {% if categories %}
+                                    {% for category in categories %}
+                                    <a href="{{ url_for('main.category_games', category_name=category.name) }}" 
+                                       class="category-filter-item d-flex align-items-center justify-content-between px-3 py-2 rounded-3 mb-2 text-decoration-none {% if current_category == category.name %}active-filter{% endif %}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="category-icon-sm me-3">
+                                                <div class="icon-wrapper-xs rounded-2 p-2" 
+                                                     style="background: rgba({% if 'Cloud' in category.name or 'cloud' in category.name.lower() %}23, 162, 184{% else %}102, 126, 234{% endif %}, 0.2);">
+                                                    <i class="fas fa-{% if 'Cloud' in category.name or 'cloud' in category.name.lower() %}cloud{% else %}fish{% endif %} text-{% if 'Cloud' in category.name or 'cloud' in category.name.lower() %}info{% else %}primary{% endif %}"></i>
+                                                </div>
+                                            </div>
+                                            <span class="text-white fw-medium">{{ category.name }}</span>
+                                        </div>
+                                        <span class="badge bg-dark rounded-pill">{{ category.count }}</span>
+                                    </a>
+                                    {% endfor %}
+                                    {% else %}
+                                    <div class="text-center py-3">
+                                        <small class="text-muted">Tidak ada kategori</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats -->
+ <!--                            <div class="quick-stats">
+                                <h6 class="text-white mb-3 fw-bold">
+                                    <i class="fas fa-chart-bar me-2"></i>Statistik
+                                </h6>
+                                <div class="stats-grid">
+                                    <div class="stat-item text-center p-3 rounded-3 bg-dark bg-opacity-25 mb-2">
+                                        <div class="stat-value text-primary fw-bold">{{ games|length }}</div>
+                                        <div class="stat-label text-muted small">Total Game</div>
+                                    </div>
+                                    <div class="stat-item text-center p-3 rounded-3 bg-dark bg-opacity-25 mb-2">
+                                        <div class="stat-value text-success fw-bold">{{ categories|length if categories else 0 }}</div>
+                                        <div class="stat-label text-muted small">Kategori</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- Features Quick Card -->
+<!--                     <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-header border-0 py-3 position-relative overflow-hidden">
+                            <div class="features-header-bg"></div>
+                            <div class="position-relative z-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-wrapper bg-white bg-opacity-20 rounded-3 p-2 me-3">
+                                        <i class="fas fa-bolt text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0 text-white fw-bold">Cepat & Aman</h5>
+                                        <small class="text-white text-opacity-75">Garansi 100%</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="feature-quick-list">
+                                <div class="feature-quick-item d-flex align-items-center mb-3">
+                                    <div class="feature-quick-icon me-3">
+                                        <i class="fas fa-shield-alt text-success"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white fw-bold small">Garansi Akun</div>
+                                        <div class="text-muted smaller">100% aman</div>
+                                    </div>
+                                </div>
+                                <div class="feature-quick-item d-flex align-items-center mb-3">
+                                    <div class="feature-quick-icon me-3">
+                                        <i class="fas fa-bolt text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white fw-bold small">Pengiriman</div>
+                                        <div class="text-muted smaller">Instan & cepat</div>
+                                    </div>
+                                </div>
+                                <div class="feature-quick-item d-flex align-items-center">
+                                    <div class="feature-quick-icon me-3">
+                                        <i class="fas fa-headset text-info"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white fw-bold small">Support 24/7</div>
+                                        <div class="text-muted smaller">Bantuan selalu</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+
+            <!-- Games Grid - Modern Layout -->
+            <div class="col-lg-9">
+                <!-- Results Header -->
+                <div class="results-header mb-5">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+                        <div class="mb-3 mb-md-0">
+                            <h2 class="results-title fw-bold text-white mb-2">
+                                {% if category_name %}
+                                <span class="text-gradient-primary">{{ category_name }}</span> Games
+                                {% else %}
+                                <span class="text-gradient-primary">Semua</span> Games
+                                {% endif %}
+                            </h2>
+                            <div class="results-meta d-flex align-items-center">
+                                <span class="text-muted me-3">
+                                    <i class="fas fa-gamepad me-1"></i>
+                                    {{ games|length }} game{% if games|length != 1 %}s{% endif %} ditemukan
+                                </span>
+                                {% if current_category %}
+                                <span class="badge bg-primary rounded-pill px-3 py-2">
+                                    <i class="fas fa-tag me-1"></i>{{ current_category }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('main.games') }}" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="fas fa-sync me-2"></i>Reset Filter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Games Grid -->
+                {% if games %}
+                <div class="row g-4">
+                    {% for game in games %}
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="game-card-modern card border-0 shadow-lg rounded-4 h-100 hover-lift-lg">
+                            <!-- Game Image -->
+                            <div class="game-image-wrapper position-relative overflow-hidden rounded-top-4">
+                                <img src="{{ game.image_url }}" 
+                                     class="card-img-top game-card-img" 
+                                     alt="{{ game.title }}"
+                                     style="height: 220px; object-fit: cover;">
+                                <!-- Stock Badge -->
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="stock-badge {% if game.stock > 0 %}in-stock{% else %}out-stock{% endif %} rounded-pill px-3 py-1">
+                                        <i class="fas fa-{% if game.stock > 0 %}check-circle{% else %}times-circle{% endif %} me-1"></i>
+                                        {{ game.stock }} stok
+                                    </span>
+                                </div>
+                                <!-- Category Badge -->
+                                <div class="position-absolute bottom-0 start-0 m-3">
+                                    <span class="game-category-badge rounded-pill px-3 py-1"
+                                          style="background: {% if 'Cloud' in game.category or 'cloud' in game.category.lower() %}#17a2b8{% else %}#667eea{% endif %};">
+                                        <i class="fas fa-{% if 'Cloud' in game.category or 'cloud' in game.category.lower() %}cloud{% else %}fish{% endif %} me-1"></i>
+                                        {{ game.category }}
+                                    </span>
+                                </div>
+                                <!-- Hover Overlay -->
+                                <div class="game-hover-overlay">
+                                    <a href="{{ url_for('main.game_detail', game_id=game.id) }}" class="btn btn-primary rounded-pill px-4">
+                                        <i class="fas fa-eye me-2"></i>Lihat Detail
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Body -->
+                            <div class="card-body d-flex flex-column p-4">
+                                <!-- Game Title -->
+                                <h5 class="game-title text-white fw-bold mb-2">{{ game.title }}</h5>
+                                
+                                <!-- Game Description -->
+                                <p class="game-description text-muted small mb-3 flex-grow-1">
+                                    {{ game.short_description[:80] }}{% if game.short_description|length > 80 %}...{% endif %}
+                                </p>
+                                
+                                <!-- Price & Actions -->
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="game-price">
+                                            <div class="price-amount h5 fw-bold text-primary mb-0">
+                                                Rp {{ "{:,.0f}".format(game.price) }}
+                                            </div>
+                                            <div class="price-label text-muted smaller">
+                                                {% if game.share_method == 'cloud_code' %}
+                                                <i class="fas fa-cloud me-1"></i>Cloud Code
+                                                {% else %}
+                                                <i class="fas fa-user me-1"></i>Full Account
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Share Method Indicator -->
+                                        <div class="share-method-indicator">
+                                            <span class="badge rounded-pill px-3 py-2"
+                                                  style="background: {% if game.share_method == 'cloud_code' %}#17a2b8{% else %}#28a745{% endif %};">
+                                                <i class="fas fa-{% if game.share_method == 'cloud_code' %}cloud{% else %}key{% endif %} me-1"></i>
+                                                {{ 'Cloud Code' if game.share_method == 'cloud_code' else 'Full Account' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="game-actions">
+                                        {% if current_user.is_authenticated %}
+                                            {% if game.stock > 0 %}
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ url_for('main.buy_now', game_id=game.id) }}" 
+                                                   class="btn btn-success btn-lg rounded-pill">
+                                                    <i class="fas fa-bolt me-2"></i>Beli Sekarang
+                                                </a>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ url_for('main.add_to_cart', game_id=game.id) }}" 
+                                                       class="btn btn-primary flex-fill rounded-pill">
+                                                        <i class="fas fa-cart-plus me-2"></i>Keranjang
+                                                    </a>
+                                                    <a href="{{ url_for('main.game_detail', game_id=game.id) }}" 
+                                                       class="btn btn-outline-primary rounded-pill px-3">
+                                                        <i class="fas fa-info"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <button class="btn btn-danger btn-lg w-100 rounded-pill" disabled>
+                                                <i class="fas fa-times-circle me-2"></i>Stok Habis
+                                            </button>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if game.stock > 0 %}
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ url_for('auth.login') }}" 
+                                                   class="btn btn-primary btn-lg rounded-pill">
+                                                    <i class="fas fa-sign-in-alt me-2"></i>Login untuk Beli
+                                                </a>
+                                                <a href="{{ url_for('main.game_detail', game_id=game.id) }}" 
+                                                   class="btn btn-outline-primary rounded-pill">
+                                                    <i class="fas fa-eye me-2"></i>Lihat Detail
+                                                </a>
+                                            </div>
+                                            {% else %}
+                                            <button class="btn btn-secondary btn-lg w-100 rounded-pill" disabled>
+                                                <i class="fas fa-clock me-2"></i>Segera Tersedia
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- No Results State -->
+                <div class="no-results text-center py-5">
+                    <div class="no-results-icon mb-4">
+                        <i class="fas fa-gamepad fa-5x text-muted"></i>
+                    </div>
+                    <h3 class="text-white fw-bold mb-3">Tidak Ada Game Ditemukan</h3>
+                    <p class="text-muted mb-4">
+                        {% if current_category %}
+                        Maaf, belum ada game dalam kategori <span class="text-primary">{{ current_category }}</span>.
+                        {% else %}
+                        Coba gunakan kata kunci lain atau pilih kategori yang berbeda.
+                        {% endif %}
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('main.games') }}" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-home me-2"></i>Semua Game
+                        </a>
+                        {% if current_category %}
+                        <a href="{{ url_for('main.games') }}" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-times me-2"></i>Hapus Filter
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Category Navigation -->
+                {% if categories and categories|length > 0 and games %}
+                <div class="category-navigation mt-5">
+                    <h4 class="text-white fw-bold mb-4">Jelajahi Kategori Lainnya</h4>
+                    <div class="row g-3">
+                        {% for category in categories %}
+                        {% if loop.index <= 6 and category.name != current_category %}
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{{ url_for('main.category_games', category_name=category.name) }}" 
+                               class="category-nav-item d-flex align-items-center p-3 rounded-4 text-decoration-none">
+                                <div class="category-nav-icon me-3">
+                                    <div class="icon-wrapper rounded-3 p-3" 
+                                         style="background: linear-gradient(135deg, {% if 'Cloud' in category.name or 'cloud' in category.name.lower() %}#17a2b8{% else %}#667eea{% endif %}, {% if 'Cloud' in category.name or 'cloud' in category.name.lower() %}#6f42c1{% else %}#764ba2{% endif %});">
+                                        <i class="fas fa-{{ 'cloud' if 'Cloud' in category.name or 'cloud' in category.name.lower() else 'fish' }} text-white fs-4"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="text-white fw-bold mb-1">{{ category.name }}</h6>
+                                    <small class="text-muted">{{ category.count }} game</small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-gradient-cta position-relative overflow-hidden">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <h2 class="text-white fw-bold mb-3">
+                    {% if current_category %}
+                    Ingin {{ current_category }} Lainnya?
+                    {% else %}
+                    Cari Game yang Tidak Ditemukan?
+                    {% endif %}
+                </h2>
+                <p class="text-light mb-0">
+                    Hubungi kami untuk request game atau konsultasi kebutuhan game digital Anda.
+                    Tim support kami siap membantu 24/7.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex flex-column flex-md-row gap-3 justify-content-lg-end">
+                    <a href="{{ url_for('main.payment_instructions') }}" 
+                       class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="fas fa-question-circle me-2"></i>Bantuan
+                    </a>
+<!--                     <a href="#" 
+                       class="btn btn-light btn-lg rounded-pill px-4 shadow-lg"
+                       onclick="alert('Hubungi WhatsApp: +62-xxx-xxxx-xxxx')">
+                        <i class="fab fa-whatsapp me-2"></i>Chat Admin
+                    </a> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Animated background elements -->
+    <div class="cta-bg-elements">
+        <div class="cta-circle cta-circle-1"></div>
+        <div class="cta-circle cta-circle-2"></div>
+        <div class="cta-circle cta-circle-3"></div>
+    </div>
+</section>
+
+<style>
+/* Games Page Specific Styles */
+:root {
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    --gradient-warning: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    --gradient-success: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+/* Hero Games Section */
+.hero-games {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-games::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(23, 162, 184, 0.1) 0%, transparent 50%);
+}
+
+.games-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.game-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    animation: float 6s ease-in-out infinite;
+}
+
+.game-circle.circle-1 {
+    width: 250px;
+    height: 250px;
+    top: -125px;
+    right: -50px;
+    animation-delay: 0s;
+}
+
+.game-circle.circle-2 {
+    width: 180px;
+    height: 180px;
+    bottom: -90px;
+    left: -40px;
+    animation-delay: 2s;
+}
+
+.game-circle.circle-3 {
+    width: 120px;
+    height: 120px;
+    top: 30%;
+    right: 10%;
+    animation-delay: 4s;
+}
+
+.floating-games {
+    position: relative;
+    height: 300px;
+    width: 300px;
+    margin: 0 auto;
+}
+
+.game-icon {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.hero-title {
+    font-size: 3rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    max-width: 500px;
+}
+
+.text-gradient-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Sticky Sidebar */
+.sticky-sidebar-games {
+    position: sticky;
+    top: 100px;
+}
+
+/* Filter Card Styles */
+.filter-header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    opacity: 0.9;
+}
+
+.features-header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-success);
+    opacity: 0.9;
+}
+
+.search-group {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-group:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Category Filter Items */
+.category-filter-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.category-filter-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateX(5px);
+}
+
+.category-filter-item.active-filter {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+.icon-wrapper-xs {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+}
+
+.feature-quick-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.smaller {
+    font-size: 0.75rem;
+}
+
+/* Results Header */
+.results-title {
+    font-size: 2rem;
+}
+
+.results-meta {
+    font-size: 0.9rem;
+}
+
+/* Game Card Modern */
+.game-card-modern {
+    background: rgba(26, 26, 46, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.game-card-modern:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.game-image-wrapper {
+    position: relative;
+}
+
+.game-card-img {
+    transition: transform 0.5s ease;
+}
+
+.game-card-modern:hover .game-card-img {
+    transform: scale(1.05);
+}
+
+/* Stock Badge */
+.stock-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stock-badge.in-stock {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.stock-badge.out-stock {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.game-category-badge {
+    font-size: 0.7rem;
+    color: white;
+    font-weight: 600;
+}
+
+/* Hover Overlay */
+.game-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.game-card-modern:hover .game-hover-overlay {
+    opacity: 1;
+}
+
+/* Game Card Content */
+.game-title {
+    font-size: 1.1rem;
+    line-height: 1.3;
+}
+
+.game-description {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.price-amount {
+    font-size: 1.5rem;
+}
+
+.price-label {
+    font-size: 0.8rem;
+}
+
+/* Action Buttons */
+.game-actions .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.game-actions .btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem !important;
+}
+
+/* Category Navigation */
+.category-navigation {
+    padding-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-nav-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.category-nav-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateX(5px);
+}
+
+.category-nav-icon {
+    flex-shrink: 0;
+}
+
+/* No Results */
+.no-results {
+    padding: 4rem 1rem;
+}
+
+.no-results-icon {
+    opacity: 0.5;
+}
+
+/* CTA Section */
+.bg-gradient-cta {
+    background: var(--gradient-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-gradient-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+}
+
+.cta-bg-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.cta-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: ctaFloat 8s ease-in-out infinite;
+}
+
+.cta-circle-1 {
+    width: 150px;
+    height: 150px;
+    top: -75px;
+    left: -75px;
+    animation-delay: 0s;
+}
+
+.cta-circle-2 {
+    width: 100px;
+    height: 100px;
+    bottom: -50px;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+.cta-circle-3 {
+    width: 80px;
+    height: 80px;
+    top: 30%;
+    right: -40px;
+    animation-delay: 4s;
+}
+
+@keyframes ctaFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(10px, -10px) rotate(5deg); }
+    66% { transform: translate(-5px, 5px) rotate(-5deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1399.98px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .game-card-img {
+        height: 200px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    .game-card-img {
+        height: 180px;
+    }
+    .price-amount {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    .game-card-img {
+        height: 160px;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .results-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    .game-card-img {
+        height: 150px;
+    }
+    .game-actions .btn {
+        padding: 0.5rem 1rem;
+    }
+    .btn-lg {
+        padding: 0.5rem 1.5rem !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Games page loaded');
+    
+    // Smooth animations for game cards
+    const gameCards = document.querySelectorAll('.game-card-modern');
+    gameCards.forEach((card, index) => {
+        card.style.animationDelay = (index * 0.05) + 's';
+        card.classList.add('animate-on-scroll');
+    });
+    
+    // Intersection Observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animated');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(element => {
+        observer.observe(element);
+    });
+    
+    // Filter item hover effects
+    const filterItems = document.querySelectorAll('.category-filter-item');
+    filterItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            const icon = this.querySelector('.icon-wrapper-xs');
+            if (icon) {
+                icon.style.transform = 'rotate(15deg)';
+            }
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            const icon = this.querySelector('.icon-wrapper-xs');
+            if (icon) {
+                icon.style.transform = 'rotate(0)';
+            }
+        });
+    });
+    
+    // Search input focus effect
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.style.boxShadow = '0 0 0 0.2rem rgba(102, 126, 234, 0.25)';
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.style.boxShadow = 'none';
+        });
+    }
+    
+    // Buy button loading state
+    const buyButtons = document.querySelectorAll('a[href*="buy_now"]');
+    buyButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
+            
+            const originalText = this.innerHTML;
+            const originalWidth = this.offsetWidth;
+            
+            // Set fixed width to prevent button resizing
+            this.style.width = originalWidth + 'px';
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+            this.classList.add('disabled');
+            
+            // Revert after 5 seconds (fallback)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.classList.remove('disabled');
+                this.style.width = '';
+            }, 5000);
+        });
+    });
+    
+    // Add to cart animation
+    const cartButtons = document.querySelectorAll('a[href*="add_to_cart"]');
+    cartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
+            
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menambahkan...';
+            this.classList.add('disabled');
+            
+            // Animate button
+            this.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.classList.remove('disabled');
+                this.style.transform = '';
+            }, 3000);
+        });
+    });
+    
+    // Category navigation items animation
+    const navItems = document.querySelectorAll('.category-nav-item');
+    navItems.forEach((item, index) => {
+        item.style.transitionDelay = (index * 0.1) + 's';
+    });
+    
+    // Stock badge animation
+    const stockBadges = document.querySelectorAll('.stock-badge.in-stock');
+    stockBadges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Parallax effect for hero section
+    window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const heroSection = document.querySelector('.hero-games');
+        
+        if (heroSection) {
+            const parallaxValue = scrolled * 0.5;
+            heroSection.style.backgroundPositionY = parallaxValue + 'px';
+        }
+    });
+    
+    // Update cart count on add to cart
+    document.querySelectorAll('a[href*="add_to_cart"]').forEach(button => {
+        button.addEventListener('click', function() {
+            // Simulate cart count update
+            setTimeout(() => {
+                fetch('/api/cart-count')
+                    .then(response => response.json())
+                    .then(data => {
+                        const cartCount = document.getElementById('cartCount');
+                        const mobileCartCount = document.getElementById('mobileCartCount');
+                        
+                        if (cartCount) cartCount.textContent = data.count;
+                        if (mobileCartCount) mobileCartCount.textContent = data.count;
+                        
+                        // Show notification
+                        const gameTitle = this.closest('.game-card-modern').querySelector('.game-title').textContent;
+                        showNotification(`${gameTitle} ditambahkan ke keranjang!`, 'success');
+                    });
+            }, 1000);
+        });
+    });
+    
+    // Notification function
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        `;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+    
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

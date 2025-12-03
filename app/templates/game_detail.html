@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.games') }}" class="text-decoration-none">Game</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.category_games', category_name=game.category) }}" class="text-decoration-none">{{ game.category }}</a></li>
+            <li class="breadcrumb-item active text-primary">{{ game.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Game Image & Gallery -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+                <img src="{{ game.image_url }}" class="img-fluid w-100" alt="{{ game.title }}" style="max-height: 500px; object-fit: cover;">
+            </div>
+            
+            <!-- Stock & Status Info -->
+            <div class="mt-4">
+                <div class="card border-0 shadow-sm bg-dark">
+                    <div class="card-body">
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-box fa-2x {% if game.stock > 0 %}text-success{% else %}text-danger{% endif %} mb-2"></i>
+                                    <span class="fw-semibold text-white">Status Stok</span>
+                                    {% if game.stock > 10 %}
+                                    <small class="text-success">Tersedia ({{ game.stock }})</small>
+                                    {% elif game.stock > 0 %}
+                                    <small class="text-warning">Menipis ({{ game.stock }})</small>
+                                    {% else %}
+                                    <small class="text-danger">Habis</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-share-alt fa-2x text-info mb-2"></i>
+                                    <span class="fw-semibold text-white">Metode</span>
+                                    <small class="text-info">
+                                        {% if game.share_method == 'cloud_code' %}
+                                        Cloud Code
+                                        {% else %}
+                                        Account
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
+                                    <span class="fw-semibold text-white">Pengiriman</span>
+                                    <small class="text-warning">Instan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Details & Actions -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-body p-4">
+                    <!-- Title & Category -->
+                    <div class="mb-3">
+                        <span class="badge bg-primary fs-6 mb-2">{{ game.category }}</span>
+                        <h1 class="display-6 fw-bold text-white mb-2">{{ game.title }}</h1>
+                        <p class="lead text-muted mb-0">{{ game.short_description }}</p>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mb-4 p-3 bg-dark rounded-3">
+                        <span class="h1 fw-bold text-primary">Rp {{ "{:,.0f}".format(game.price) }}</span>
+                        <small class="text-muted d-block">Harga termasuk akses seumur hidup</small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    {% if in_library %}
+                    <div class="alert alert-success border-0 rounded-3 mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle fa-2x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Game Sudah di Library Anda!</h5>
+                                <p class="mb-0">Anda dapat mengakses game ini kapan saja</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('main.download_game', game_id=game.id) }}" class="btn btn-success btn-lg py-3 rounded-3 fw-bold">
+                            <i class="fas fa-download me-2"></i>Akses Game Sekarang
+                        </a>
+                        <a href="{{ url_for('main.library') }}" class="btn btn-outline-primary btn-lg py-3 rounded-3">
+                            <i class="fas fa-bookmark me-2"></i>Lihat Library Saya
+                        </a>
+                    </div>
+                    {% else %}
+                        {% if game.stock > 0 %}
+                        <div class="d-grid gap-3 mb-4">
+                            {% if current_user.is_authenticated %}
+                            <div class="btn-group btn-group-lg">
+                                <a href="{{ url_for('main.buy_now', game_id=game.id) }}" class="btn btn-success flex-fill py-3 rounded-3 fw-bold">
+                                    <i class="fas fa-bolt me-2"></i>Beli Langsung
+                                </a>
+                                <a href="{{ url_for('main.add_to_cart', game_id=game.id) }}" class="btn btn-primary px-4 rounded-3" title="Tambah ke Keranjang">
+                                    <i class="fas fa-cart-plus"></i>
+                                </a>
+                            </div>
+                            {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg py-3 rounded-3 fw-bold">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login untuk Membeli
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning border-0 rounded-3 mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clock fa-2x me-3"></i>
+                                <div>
+                                    <h5 class="mb-1">Stok Sedang Habis</h5>
+                                    <p class="mb-0">Silakan cek kembali nanti untuk ketersediaan</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary btn-lg w-100 py-3 rounded-3" disabled>
+                            <i class="fas fa-times me-2"></i>Stok Habis
+                        </button>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Security Badges -->
+                    <div class="row g-2 mt-4">
+                        <div class="col-4">
+                            <div class="text-center p-2 bg-dark rounded-3">
+                                <i class="fas fa-shield-alt text-success mb-1"></i>
+                                <small class="d-block text-white">Aman</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-2 bg-dark rounded-3">
+                                <i class="fas fa-bolt text-warning mb-1"></i>
+                                <small class="d-block text-white">Instan</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-2 bg-dark rounded-3">
+                                <i class="fas fa-infinity text-info mb-1"></i>
+                                <small class="d-block text-white">Seumur Hidup</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Description & Details -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h3 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-info-circle me-2"></i>Tentang Game Ini
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <h4 class="text-white mb-3">Deskripsi Game</h4>
+                            <p class="text-muted lead mb-4">{{ game.short_description }}</p>
+                            <div class="text-justify text-white" style="line-height: 1.8;">
+                                {{ game.description|replace('\n', '<br>')|safe }}
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <h4 class="text-white mb-3">Fitur Utama</h4>
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item bg-transparent text-white border-secondary">
+                                    <i class="fas fa-bolt text-warning me-3"></i>
+                                    <span>Pengiriman Instan</span>
+                                </div>
+                                <div class="list-group-item bg-transparent text-white border-secondary">
+                                    <i class="fas fa-shield-alt text-success me-3"></i>
+                                    <span>Pembayaran Aman</span>
+                                </div>
+                                <div class="list-group-item bg-transparent text-white border-secondary">
+                                    <i class="fas fa-infinity text-info me-3"></i>
+                                    <span>Akses Seumur Hidup</span>
+                                </div>
+                                <div class="list-group-item bg-transparent text-white border-secondary">
+                                    <i class="fas fa-headset text-primary me-3"></i>
+                                    <span>Support 24/7</span>
+                                </div>
+                                <div class="list-group-item bg-transparent text-white border-secondary">
+                                    <i class="fas fa-mobile-alt text-warning me-3"></i>
+                                    <span>
+                                        {% if game.share_method == 'cloud_code' %}
+                                        Akses Cloud Code
+                                        {% else %}
+                                        Akses Account
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="list-group-item bg-transparent text-white border-secondary">
+                                    <i class="fas fa-sync text-success me-3"></i>
+                                    <span>Update Berkala</span>
+                                </div>
+                            </div>
+
+                            <!-- System Requirements -->
+                            <div class="mt-4 p-3 bg-dark rounded-3">
+                                <h6 class="text-white mb-3">
+                                    <i class="fas fa-cog me-2"></i>Kompatibilitas
+                                </h6>
+                                <div class="text-muted small">
+                                    <div class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <span>Smartphone & Tablet</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <span>Windows & Mac</span>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        <span>Koneksi Internet</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Games (Optional) -->
+    {% if not in_library and game.stock > 0 %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h3 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-rocket me-2"></i>Siap Bermain?
+                    </h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <p class="lead text-muted mb-4">Dapatkan game ini sekarang dan mulai petualangan Anda!</p>
+                    {% if current_user.is_authenticated %}
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{{ url_for('main.buy_now', game_id=game.id) }}" class="btn btn-success btn-lg px-5 py-3 rounded-3 fw-bold">
+                            <i class="fas fa-bolt me-2"></i>Beli Sekarang
+                        </a>
+                        <a href="{{ url_for('main.add_to_cart', game_id=game.id) }}" class="btn btn-primary btn-lg px-5 py-3 rounded-3">
+                            <i class="fas fa-cart-plus me-2"></i>Tambah ke Keranjang
+                        </a>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 fw-bold">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login untuk Membeli
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.list-group-item {
+    padding: 1rem 1.25rem;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+/* Custom badge styles */
+.badge {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-6 {
+        font-size: 1.75rem;
+    }
+    
+    .btn-group-lg > .btn {
+        padding: 1rem 1.5rem;
+    }
+}
+</style>
+
+<script>
+// Smooth scroll untuk anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Add to cart animation
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartBtn = document.querySelector('a[href*="add-to-cart"]');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function(e) {
+            // Add loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menambah...';
+            this.disabled = true;
+            
+            // Reset after 2 seconds if still on page
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 2000);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+
+{% block title %}Download - {{ game.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.library') }}" class="text-decoration-none">Library</a></li>
+            <li class="breadcrumb-item active text-primary">{{ game.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-success border-0 py-4">
+                    <h3 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-download me-2"></i>Akses Game
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Game Info -->
+                    <div class="text-center mb-5">
+                        <img src="{{ game.image_url }}" class="img-fluid rounded-3 mb-4" alt="{{ game.title }}" style="max-height: 200px; width: auto;">
+                        <h2 class="fw-bold text-white mb-2">{{ game.title }}</h2>
+                        <span class="badge bg-primary fs-6">{{ game.category }}</span>
+                        <p class="text-muted mt-2">Download Count: {{ library_item.download_count }}</p>
+                    </div>
+
+                    <!-- Access Method -->
+                    {% if game.share_method == 'cloud_code' %}
+                    <!-- Cloud Code Access -->
+                    <div class="access-method">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-info border-0 py-3">
+                                <h4 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-cloud me-2"></i>Akses Cloud Code
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info border-0 rounded-3 mb-4">
+                                    <div class="d-flex">
+                                        <i class="fas fa-key fa-2x text-info me-3"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-2">Gunakan Kode Berikut</h5>
+                                            <p class="mb-0">Kode ini unik untuk pembelian Anda. Jangan bagikan kepada siapapun.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center mb-4">
+                                    <div class="p-4 bg-dark rounded-3 position-relative">
+                                        <code class="h2 fw-bold text-white font-monospace">
+                                            {{ library_item.access_code or game.cloud_code }}
+                                        </code>
+                                        <button class="btn btn-outline-light position-absolute top-0 end-0 m-3" 
+                                                onclick="copyToClipboard('{{ library_item.access_code or game.cloud_code }}')">
+                                            <i class="fas fa-copy me-2"></i>Salin
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="instructions">
+                                    <h5 class="text-white mb-3">
+                                        <i class="fas fa-play-circle me-2"></i>Cara Menggunakan:
+                                    </h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">1</span>
+                                                <div>
+                                                    <strong class="text-white">Buka Aplikasi Game</strong>
+                                                    <p class="text-muted small mb-0">Jalankan game di perangkat Anda</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">2</span>
+                                                <div>
+                                                    <strong class="text-white">Pilih Cloud Save</strong>
+                                                    <p class="text-muted small mb-0">Masuk ke menu "Cloud Save" atau "Sync"</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">3</span>
+                                                <div>
+                                                    <strong class="text-white">Masukkan Kode</strong>
+                                                    <p class="text-muted small mb-0">Ketikan kode di atas pada kolom yang tersedia</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">4</span>
+                                                <div>
+                                                    <strong class="text-white">Mulai Bermain</strong>
+                                                    <p class="text-muted small mb-0">Data game akan terload otomatis</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% elif game.share_method == 'account' %}
+                    <!-- Account Access -->
+                    <div class="access-method">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-warning border-0 py-3">
+                                <h4 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-user-shield me-2"></i>Akses Account
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning border-0 rounded-3 mb-4">
+                                    <div class="d-flex">
+                                        <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-2">Penting!</h5>
+                                            <p class="mb-0">Jangan mengubah password atau email account ini. Perubahan dapat mengakibatkan hilangnya akses.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="credentials">
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <div class="card bg-dark border-secondary h-100">
+                                                <div class="card-body">
+                                                    <label class="form-label fw-semibold text-white mb-3">
+                                                        <i class="fas fa-envelope me-2"></i>Email/Username:
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control bg-dark text-white border-secondary" 
+                                                               value="{{ library_item.account_email or game.account_email }}" 
+                                                               id="accountEmail" readonly>
+                                                        <button class="btn btn-outline-light" type="button" 
+                                                                onclick="copyToClipboard('accountEmail')">
+                                                            <i class="fas fa-copy"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card bg-dark border-secondary h-100">
+                                                <div class="card-body">
+                                                    <label class="form-label fw-semibold text-white mb-3">
+                                                        <i class="fas fa-lock me-2"></i>Password:
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control bg-dark text-white border-secondary" 
+                                                               value="{{ library_item.account_password or game.account_password }}" 
+                                                               id="accountPassword" readonly>
+                                                        <button class="btn btn-outline-light" type="button" 
+                                                                onclick="togglePassword()">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn btn-outline-light" type="button" 
+                                                                onclick="copyToClipboard('accountPassword')">
+                                                            <i class="fas fa-copy"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="instructions mt-4">
+                                    <h5 class="text-white mb-3">
+                                        <i class="fas fa-play-circle me-2"></i>Cara Menggunakan:
+                                    </h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">1</span>
+                                                <div>
+                                                    <strong class="text-white">Buka Game</strong>
+                                                    <p class="text-muted small mb-0">Jalankan aplikasi game</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">2</span>
+                                                <div>
+                                                    <strong class="text-white">Login</strong>
+                                                    <p class="text-muted small mb-0">Gunakan kredensial di atas</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">3</span>
+                                                <div>
+                                                    <strong class="text-white">Akses Konten</strong>
+                                                    <p class="text-muted small mb-0">Progress dan item akan tersedia</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex">
+                                                <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; line-height: 30px;">4</span>
+                                                <div>
+                                                    <strong class="text-white">Jangan Ubah Settings</strong>
+                                                    <p class="text-muted small mb-0">Biarkan pengaturan account tetap</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Security Notice -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-dark border-secondary py-3">
+                            <h5 class="mb-0 text-white fw-semibold">
+                                <i class="fas fa-shield-alt me-2"></i>Pemberitahuan Keamanan
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-user-lock text-success me-3 mt-1"></i>
+                                        <div>
+                                            <strong class="text-white">Penggunaan Pribadi</strong>
+                                            <p class="text-muted small mb-0">Informasi akses hanya untuk Anda</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-share-alt text-danger me-3 mt-1"></i>
+                                        <div>
+                                            <strong class="text-white">Jangan Bagikan</strong>
+                                            <p class="text-muted small mb-0">Jangan berikan detail ini ke orang lain</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-sync text-warning me-3 mt-1"></i>
+                                        <div>
+                                            <strong class="text-white">Hindari Perubahan</strong>
+                                            <p class="text-muted small mb-0">Perubahan dapat menghilangkan akses</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-headset text-info me-3 mt-1"></i>
+                                        <div>
+                                            <strong class="text-white">Butuh Bantuan?</strong>
+                                            <p class="text-muted small mb-0">Hubungi support jika ada masalah</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{{ url_for('main.library') }}" class="btn btn-outline-primary px-4 py-2 rounded-3">
+                            <i class="fas fa-arrow-left me-2"></i>Kembali ke Library
+                        </a>
+                        <button class="btn btn-success px-4 py-2 rounded-3" onclick="printPage()">
+                            <i class="fas fa-print me-2"></i>Cetak Detail
+                        </button>
+                        <button class="btn btn-info px-4 py-2 rounded-3" onclick="saveAsText()">
+                            <i class="fas fa-file-alt me-2"></i>Simpan sebagai Text
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+}
+
+/* Print styles */
+@media print {
+    .btn, .breadcrumb, nav {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+}
+</style>
+
+<script>
+function copyToClipboard(textOrElementId) {
+    let textToCopy;
+    
+    if (typeof textOrElementId === 'string' && document.getElementById(textOrElementId)) {
+        // If it's an element ID
+        const element = document.getElementById(textOrElementId);
+        element.select();
+        element.setSelectionRange(0, 99999);
+        textToCopy = element.value;
+    } else {
+        // If it's direct text
+        textToCopy = textOrElementId;
+    }
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showNotification('Berhasil disalin ke clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('Berhasil disalin ke clipboard!', 'success');
+    });
+}
+
+function togglePassword() {
+    const passwordField = document.getElementById('accountPassword');
+    const eyeIcon = passwordField.parentNode.querySelector('.fa-eye');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.className = 'fas fa-eye-slash';
+    } else {
+        passwordField.type = 'password';
+        eyeIcon.className = 'fas fa-eye';
+    }
+}
+
+function printPage() {
+    window.print();
+}
+
+function saveAsText() {
+    const gameTitle = '{{ game.title }}';
+    const gameCategory = '{{ game.category }}';
+    let accessDetails = '';
+    
+    {% if game.share_method == 'cloud_code' %}
+    accessDetails = `Kode Cloud: {{ library_item.access_code or game.cloud_code }}`;
+    {% elif game.share_method == 'account' %}
+    accessDetails = `Email: {{ library_item.account_email or game.account_email }}\nPassword: {{ library_item.account_password or game.account_password }}`;
+    {% endif %}
+    
+    const textContent = `
+GameStore - Detail Akses Game
+==============================
+
+Judul Game: ${gameTitle}
+Kategori: ${gameCategory}
+Metode Akses: {{ 'Cloud Code' if game.share_method == 'cloud_code' else 'Account' }}
+
+${accessDetails}
+
+Tanggal Akses: ${new Date().toLocaleDateString('id-ID')}
+
+--- PENTING ---
+* Informasi ini hanya untuk penggunaan pribadi
+* Jangan bagikan kepada siapapun
+* Hubungi support jika mengalami masalah
+    `.trim();
+
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `akses-${gameTitle.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('File berhasil diunduh!', 'success');
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Auto-select text when clicking on input fields
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input[readonly]');
+    inputs.forEach(input => {
+        input.addEventListener('click', function() {
+            this.select();
+        });
+    });
+});
+</script>
+{% endblock %}

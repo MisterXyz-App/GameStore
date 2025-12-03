@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h3 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-gamepad me-2"></i>{{ title }}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" id="gameForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Basic Information Section -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark border-secondary py-3">
+                                <h5 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-info-circle me-2"></i>Informasi Dasar Game
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.title.label(class="form-label fw-semibold text-white") }}
+                                            {{ form.title(class="form-control bg-dark text-white border-secondary") }}
+                                            {% if form.title.errors %}
+                                                <div class="text-danger small mt-2">
+                                                    {% for error in form.title.errors %}
+                                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.category.label(class="form-label fw-semibold text-white") }}
+                                            {{ form.category(class="form-control bg-dark text-white border-secondary") }}
+                                            {% if form.category.errors %}
+                                                <div class="text-danger small mt-2">
+                                                    {% for error in form.category.errors %}
+                                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.short_description.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.short_description(class="form-control bg-dark text-white border-secondary", rows="2", placeholder="Deskripsi singkat game (maksimal 200 karakter)") }}
+                                    <div class="form-text text-muted">
+                                        <span id="shortDescCounter">0</span>/200 karakter
+                                    </div>
+                                    {% if form.short_description.errors %}
+                                        <div class="text-danger small mt-2">
+                                            {% for error in form.short_description.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.description.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.description(class="form-control bg-dark text-white border-secondary", rows="5", placeholder="Deskripsi lengkap tentang game, fitur, dan gameplay") }}
+                                    <div class="form-text text-muted">Deskripsi detail yang akan ditampilkan di halaman game</div>
+                                    {% if form.description.errors %}
+                                        <div class="text-danger small mt-2">
+                                            {% for error in form.description.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Stock Section -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark border-secondary py-3">
+                                <h5 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-tag me-2"></i>Harga & Stok
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.price.label(class="form-label fw-semibold text-white") }}
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-dark text-white border-secondary">Rp</span>
+                                                {{ form.price(class="form-control bg-dark text-white border-secondary", type="number", step="0.01", min="0", placeholder="0") }}
+                                            </div>
+                                            <div class="form-text text-muted">Harga jual game dalam Rupiah</div>
+                                            {% if form.price.errors %}
+                                                <div class="text-danger small mt-2">
+                                                    {% for error in form.price.errors %}
+                                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.stock.label(class="form-label fw-semibold text-white") }}
+                                            <div class="input-group">
+                                                {{ form.stock(class="form-control bg-dark text-white border-secondary", type="number", min="0", placeholder="0") }}
+                                                {% if game and game.stock > 0 %}
+                                                <span class="input-group-text bg-info text-white">
+                                                    Stok: {{ game.stock }}
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="form-text text-muted">
+                                                {% if game %}
+                                                Stok awal: {{ game.initial_stock }} | Terjual: {{ game.initial_stock - game.stock }}
+                                                {% else %}
+                                                Jumlah stok awal yang tersedia
+                                                {% endif %}
+                                            </div>
+                                            {% if form.stock.errors %}
+                                                <div class="text-danger small mt-2">
+                                                    {% for error in form.stock.errors %}
+                                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Method Section -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark border-secondary py-3">
+                                <h5 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-share-alt me-2"></i>Metode Pengiriman Game
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    {{ form.share_method.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.share_method(class="form-select bg-dark text-white border-secondary", onchange="toggleShareMethod()") }}
+                                    <div class="form-text text-muted">Pilih metode bagaimana game akan dikirim ke pembeli</div>
+                                    {% if form.share_method.errors %}
+                                        <div class="text-danger small mt-2">
+                                            {% for error in form.share_method.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Cloud Code Fields -->
+                                <div id="cloud-code-fields" class="share-method-fields">
+                                    <div class="alert alert-info border-0 rounded-3 mb-3">
+                                        <div class="d-flex">
+                                            <i class="fas fa-cloud fa-2x text-info me-3"></i>
+                                            <div>
+                                                <h6 class="alert-heading mb-2">Metode Cloud Code</h6>
+                                                <p class="mb-0">Game akan dikirim menggunakan kode cloud/phone yang dapat diakses oleh pembeli</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.cloud_code.label(class="form-label fw-semibold text-white") }}
+                                        {{ form.cloud_code(class="form-control bg-dark text-white border-secondary", placeholder="Masukkan kode cloud/phone") }}
+                                        <div class="form-text text-muted">Kode unik yang akan dibagikan ke pembeli untuk akses cloud</div>
+                                        {% if form.cloud_code.errors %}
+                                            <div class="text-danger small mt-2">
+                                                {% for error in form.cloud_code.errors %}
+                                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Account Fields -->
+                                <div id="account-fields" class="share-method-fields">
+                                    <div class="alert alert-warning border-0 rounded-3 mb-3">
+                                        <div class="d-flex">
+                                            <i class="fas fa-user-shield fa-2x text-warning me-3"></i>
+                                            <div>
+                                                <h6 class="alert-heading mb-2">Metode Account</h6>
+                                                <p class="mb-0">Game akan dikirim dengan memberikan akses account kepada pembeli</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                {{ form.account_email.label(class="form-label fw-semibold text-white") }}
+                                                {{ form.account_email(class="form-control bg-dark text-white border-secondary", placeholder="game@example.com") }}
+                                                <div class="form-text text-muted">Email account game yang akan dibagikan</div>
+                                                {% if form.account_email.errors %}
+                                                    <div class="text-danger small mt-2">
+                                                        {% for error in form.account_email.errors %}
+                                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                {{ form.account_password.label(class="form-label fw-semibold text-white") }}
+                                                {{ form.account_password(class="form-control bg-dark text-white border-secondary", placeholder="Password account") }}
+                                                <div class="form-text text-muted">Password account yang akan dibagikan ke pembeli</div>
+                                                {% if form.account_password.errors %}
+                                                    <div class="text-danger small mt-2">
+                                                        {% for error in form.account_password.errors %}
+                                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload Section -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark border-secondary py-3">
+                                <h5 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-image me-2"></i>Gambar Cover Game
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form.image_file.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.image_file(class="form-control bg-dark text-white border-secondary") }}
+                                    <div class="form-text text-muted">
+                                        Unggah gambar cover game (JPG, PNG, GIF, WebP). Ukuran disarankan: 800x600px. Maks. 5MB.
+                                    </div>
+                                    {% if form.image_file.errors %}
+                                        <div class="text-danger small mt-2">
+                                            {% for error in form.image_file.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Current Image Preview -->
+                                    {% if game and game.image_url %}
+                                    <div class="mt-3 p-3 bg-dark rounded-3">
+                                        <strong class="text-white d-block mb-2">Gambar Saat Ini:</strong>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="{{ game.image_url }}" class="img-thumbnail rounded-3" style="max-height: 150px;" alt="Current image">
+                                            <div class="text-muted small">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Gambar akan diganti jika Anda mengunggah file baru
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Section -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark border-secondary py-3">
+                                <h5 class="mb-0 text-white fw-semibold">
+                                    <i class="fas fa-cog me-2"></i>Status Game
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch">
+                                    {{ form.is_active(class="form-check-input", style="transform: scale(1.2);") }}
+                                    {{ form.is_active.label(class="form-check-label fw-semibold text-white") }}
+                                </div>
+                                <div class="form-text text-muted">
+                                    Nonaktifkan jika game tidak tersedia untuk sementara waktu
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center pt-4 border-top border-secondary">
+                            <a href="{{ url_for('admin.admin_games') }}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                                <i class="fas fa-arrow-left me-2"></i>Kembali
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-semibold">
+                                <i class="fas fa-save me-2"></i>{{ 'Update Game' if game else 'Buat Game' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.form-control, .form-select {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.share-method-fields {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.input-group-text {
+    border-radius: 0.75rem 0 0 0.75rem;
+}
+
+.form-control:first-child {
+    border-radius: 0 0.75rem 0.75rem 0;
+}
+
+/* Character counter styling */
+#shortDescCounter {
+    font-weight: 600;
+}
+
+#shortDescCounter.warning {
+    color: #ffc107;
+}
+
+#shortDescCounter.danger {
+    color: #dc3545;
+}
+</style>
+
+<script>
+function toggleShareMethod() {
+    const shareMethod = document.querySelector('select[name="share_method"]').value;
+    const cloudFields = document.getElementById('cloud-code-fields');
+    const accountFields = document.getElementById('account-fields');
+    
+    // Hide all fields first
+    cloudFields.style.display = 'none';
+    accountFields.style.display = 'none';
+    
+    // Show relevant fields
+    if (shareMethod === 'cloud_code') {
+        cloudFields.style.display = 'block';
+    } else if (shareMethod === 'account') {
+        accountFields.style.display = 'block';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleShareMethod();
+    
+    // Character counter for short description
+    const shortDesc = document.querySelector('textarea[name="short_description"]');
+    const counter = document.getElementById('shortDescCounter');
+    
+    if (shortDesc && counter) {
+        function updateCounter() {
+            const length = shortDesc.value.length;
+            counter.textContent = length;
+            
+            if (length > 180) {
+                counter.className = 'warning';
+            } else if (length > 200) {
+                counter.className = 'danger';
+            } else {
+                counter.className = '';
+            }
+        }
+        
+        shortDesc.addEventListener('input', updateCounter);
+        updateCounter(); // Initial count
+    }
+    
+    // Form validation and loading state
+    const form = document.getElementById('gameForm');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+        submitBtn.disabled = true;
+        
+        // Validate short description length
+        const shortDesc = document.querySelector('textarea[name="short_description"]');
+        if (shortDesc && shortDesc.value.length > 200) {
+            e.preventDefault();
+            showNotification('Deskripsi singkat tidak boleh lebih dari 200 karakter!', 'danger');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+        
+        // Validate stock when editing
+        {% if game %}
+        const stockInput = document.querySelector('input[name="stock"]');
+        if (stockInput) {
+            const newStock = parseInt(stockInput.value);
+            const currentStock = parseInt('{{ game.stock }}');
+            
+            if (newStock < currentStock) {
+                e.preventDefault();
+                showNotification('Tidak bisa mengurangi stok dari ' + currentStock + ' ke ' + newStock + '. Gunakan form restock hanya untuk menambah stok.', 'warning');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+        }
+        {% endif %}
+        
+        // Re-enable after 5 seconds if still on page (fallback)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 5000);
+    });
+    
+    // Image file preview
+    const imageFile = document.querySelector('input[name="image_file"]');
+    if (imageFile) {
+        imageFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('Ukuran file terlalu besar! Maksimal 5MB.', 'danger');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showNotification('Format file tidak didukung! Gunakan JPG, PNG, GIF, atau WebP.', 'danger');
+                    this.value = '';
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // You can add a preview feature here if needed
+                    console.log('File selected:', file.name);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Price formatting helper
+function formatPrice(input) {
+    // Remove non-numeric characters
+    let value = input.value.replace(/[^\d]/g, '');
+    
+    // Format with thousand separators
+    if (value) {
+        value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+}
+</script>
+{% endblock %}
