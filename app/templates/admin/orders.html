@@ -1,0 +1,640 @@
+{% extends "base.html" %}
+
+{% block title %}Kelola Pesanan{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-4 fw-bold text-white mb-2">
+                        <i class="fas fa-shopping-cart me-3"></i>Kelola Pesanan
+                    </h1>
+                    <p class="text-muted lead">Kelola dan verifikasi pesanan pelanggan</p>
+                </div>
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-primary px-4 py-2 rounded-3">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 hover-lift bg-gradient-primary text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-semibold text-uppercase mb-2">Total Pesanan</div>
+                            <div class="h3 fw-bold">{{ orders|length }}</div>
+                            <div class="small">
+                                <i class="fas fa-shopping-bag me-1"></i>Semua pesanan
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <i class="fas fa-shopping-cart fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 hover-lift bg-gradient-warning">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-semibold text-uppercase mb-2">Menunggu</div>
+                            <div class="h3 fw-bold text-white">{{ orders|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+                            <div class="small text-white">
+                                <i class="fas fa-clock me-1"></i>Perlu verifikasi
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <i class="fas fa-clock fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 hover-lift bg-gradient-success">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-semibold text-uppercase mb-2">Berhasil</div>
+                            <div class="h3 fw-bold text-white">{{ orders|selectattr('status', 'equalto', 'paid')|list|length }}</div>
+                            <div class="small text-white">
+                                <i class="fas fa-check-circle me-1"></i>Sudah dibayar
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <i class="fas fa-check-circle fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 hover-lift bg-gradient-danger">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="small fw-semibold text-uppercase mb-2">Dibatalkan</div>
+                            <div class="h3 fw-bold text-white">{{ orders|selectattr('status', 'equalto', 'cancelled')|list|length }}</div>
+                            <div class="small text-white">
+                                <i class="fas fa-times-circle me-1"></i>Tidak disetujui
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <i class="fas fa-times-circle fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs --><!-- Filter Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-body p-3">
+                    <div class="row align-items-center">
+                        <!-- Filter Buttons - Full width on mobile, half on desktop -->
+                        <div class="col-lg-8 col-md-12 mb-3 mb-lg-0">
+                            <div class="btn-group d-flex flex-wrap" role="group">
+                                <a href="{{ url_for('admin.admin_orders') }}?status=all" 
+                                   class="btn btn-outline-primary px-3 py-2 mb-1 me-1 rounded-3 flex-fill text-center {% if status_filter == 'all' %}active bg-primary text-white{% endif %}"
+                                   style="min-width: 120px;">
+                                    <i class="fas fa-layer-group me-2"></i>Semua
+                                    <span class="badge bg-{% if status_filter == 'all' %}light text-primary{% else %}primary{% endif %} ms-2">
+                                        {{ orders|length }}
+                                    </span>
+                                </a>
+                                <a href="{{ url_for('admin.admin_orders') }}?status=pending" 
+                                   class="btn btn-outline-warning px-3 py-2 mb-1 me-1 rounded-3 flex-fill text-center {% if status_filter == 'pending' %}active bg-warning text-dark{% endif %}"
+                                   style="min-width: 120px;">
+                                    <i class="fas fa-clock me-2"></i>Menunggu
+                                    <span class="badge bg-{% if status_filter == 'pending' %}light text-warning{% else %}warning text-dark{% endif %} ms-2">
+                                        {{ orders|selectattr('status', 'equalto', 'pending')|list|length }}
+                                    </span>
+                                </a>
+                                <a href="{{ url_for('admin.admin_orders') }}?status=paid" 
+                                   class="btn btn-outline-success px-3 py-2 mb-1 me-1 rounded-3 flex-fill text-center {% if status_filter == 'paid' %}active bg-success text-white{% endif %}"
+                                   style="min-width: 120px;">
+                                    <i class="fas fa-check-circle me-2"></i>Berhasil
+                                    <span class="badge bg-{% if status_filter == 'paid' %}light text-success{% else %}success{% endif %} ms-2">
+                                        {{ orders|selectattr('status', 'equalto', 'paid')|list|length }}
+                                    </span>
+                                </a>
+                                <a href="{{ url_for('admin.admin_orders') }}?status=cancelled" 
+                                   class="btn btn-outline-danger px-3 py-2 mb-1 me-1 rounded-3 flex-fill text-center {% if status_filter == 'cancelled' %}active bg-danger text-white{% endif %}"
+                                   style="min-width: 120px;">
+                                    <i class="fas fa-times-circle me-2"></i>Dibatalkan
+                                    <span class="badge bg-{% if status_filter == 'cancelled' %}light text-danger{% else %}danger{% endif %} ms-2">
+                                        {{ orders|selectattr('status', 'equalto', 'cancelled')|list|length }}
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Search Box -->
+                        <div class="col-lg-4 col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark text-white border-secondary">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" id="searchOrders" class="form-control bg-dark text-white border-secondary" 
+                                       placeholder="Cari pesanan atau pelanggan...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Orders Table -->
+    <div class="card border-0 shadow-lg rounded-3">
+        <div class="card-header bg-gradient-primary border-0 py-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0 text-white fw-bold">
+                    <i class="fas fa-list me-2"></i>Daftar Pesanan
+                    <span class="badge bg-light text-primary ms-2 fs-6">{{ orders|length }}</span>
+                </h3>
+                <div class="text-white">
+                    <small>
+                        <i class="fas fa-money-bill-wave me-1"></i>
+                        Total Pendapatan: Rp {{ "{:,.0f}".format(orders|selectattr('status', 'equalto', 'paid')|map(attribute='total_amount')|sum) }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if orders %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-dark">
+                        <tr>
+                            <th class="text-white border-0 ps-4">ID Pesanan</th>
+                            <th class="text-white border-0">Pelanggan</th>
+                            <th class="text-white border-0">Jumlah</th>
+                            <th class="text-white border-0">Status</th>
+                            <th class="text-white border-0">Metode Bayar</th>
+                            <th class="text-white border-0">Tanggal</th>
+                            <th class="text-white border-0 pe-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="border-bottom order-row">
+                            <td class="ps-4">
+                                <div class="d-flex flex-column">
+                                    <code class="text-info fw-bold mb-1">{{ order.id[:8] }}...</code>
+                                    <small class="text-muted">
+                                        <i class="fas fa-box me-1"></i>
+                                        {{ order.items|length }} item
+                                    </small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            {{ order.user.username[:1]|upper }}
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <strong class="text-white d-block">{{ order.user.username }}</strong>
+                                        <small class="text-muted">{{ order.user.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="h5 text-success fw-bold mb-0">Rp {{ "{:,.0f}".format(order.total_amount) }}</div>
+                            </td>
+                            <td>
+                                {% if order.status == 'paid' %}
+                                <span class="badge bg-success rounded-pill py-2 px-3">
+                                    <i class="fas fa-check-circle me-1"></i>Berhasil
+                                </span>
+                                {% elif order.status == 'pending' %}
+                                <span class="badge bg-warning rounded-pill py-2 px-3">
+                                    <i class="fas fa-clock me-1"></i>Menunggu
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger rounded-pill py-2 px-3">
+                                    <i class="fas fa-times-circle me-1"></i>Dibatalkan
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if order.payment_method %}
+                                <span class="badge bg-info rounded-pill py-2 px-3">
+                                    <i class="fas fa-credit-card me-1"></i>
+                                    {{ order.payment_method }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary rounded-pill py-2 px-3">
+                                    <i class="fas fa-question me-1"></i>Tidak ada
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <strong class="text-white">{{ order.created_at.strftime('%d/%m/%Y') }}</strong>
+                                    <small class="text-muted">{{ order.created_at.strftime('%H:%M') }}</small>
+                                </div>
+                            </td>
+                            <td class="pe-4">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="{{ url_for('admin.admin_order_detail', order_id=order.id) }}" 
+                                       class="btn btn-outline-info btn-sm rounded-3 px-3" 
+                                       title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    {% if order.status == 'pending' %}
+                                    <button type="button" 
+                                            class="btn btn-outline-success btn-sm rounded-3 px-3" 
+                                            title="Setujui Pembayaran"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#approveModal{{ order.id }}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    
+                                    <button type="button" 
+                                            class="btn btn-outline-danger btn-sm rounded-3 px-3" 
+                                            title="Tolak Pembayaran"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#rejectModal{{ order.id }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Approve Modal -->
+                        {% if order.status == 'pending' %}
+                        <div class="modal fade" id="approveModal{{ order.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-success">
+                                            <i class="fas fa-check-circle me-2"></i>Setujui Pembayaran
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Anda yakin ingin menyetujui pembayaran untuk pesanan ini?</p>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Pesanan #{{ order.id[:8] }}</strong><br>
+                                            <small>Pelanggan: {{ order.user.username }}</small><br>
+                                            <small>Total: Rp {{ "{:,.0f}".format(order.total_amount) }}</small>
+                                        </div>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Game akan ditambahkan ke library pelanggan.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <form method="POST" action="{{ url_for('admin.verify_payment', order_id=order.id) }}">
+                                            <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-check me-2"></i>Ya, Setujui
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reject Modal -->
+                        <div class="modal fade" id="rejectModal{{ order.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-danger">
+                                            <i class="fas fa-times-circle me-2"></i>Tolak Pembayaran
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Anda yakin ingin menolak pembayaran untuk pesanan ini?</p>
+                                        <div class="alert alert-danger">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Pesanan #{{ order.id[:8] }}</strong><br>
+                                            <small>Pelanggan: {{ order.user.username }}</small><br>
+                                            <small>Total: Rp {{ "{:,.0f}".format(order.total_amount) }}</small>
+                                        </div>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Stok game akan dikembalikan dan pesanan akan dibatalkan.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <form method="POST" action="{{ url_for('admin.verify_payment', order_id=order.id) }}">
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-times me-2"></i>Ya, Tolak
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                <h3 class="text-white mb-3">
+                    {% if status_filter != 'all' %}
+                    Tidak Ada Pesanan {{ status_filter|title }}
+                    {% else %}
+                    Belum Ada Pesanan
+                    {% endif %}
+                </h3>
+                <p class="text-muted mb-4">
+                    {% if status_filter != 'all' %}
+                    Tidak ada pesanan dengan status "{{ status_filter }}" saat ini.
+                    {% else %}
+                    Belum ada pesanan yang dibuat oleh pelanggan.
+                    {% endif %}
+                </p>
+                {% if status_filter != 'all' %}
+                <a href="{{ url_for('admin.admin_orders') }}?status=all" class="btn btn-primary px-4 py-2 rounded-3">
+                    <i class="fas fa-layer-group me-2"></i>Lihat Semua Pesanan
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    {% if orders %}
+    <div class="row mt-4 g-3">
+        <div class="col-md-4">
+            <a href="{{ url_for('admin.admin_games') }}" class="text-decoration-none">
+                <div class="card border-0 bg-primary text-white text-center py-3 rounded-3 hover-lift">
+                    <i class="fas fa-gamepad fa-2x mb-2"></i>
+                    <div class="h5 fw-bold mb-1">Kelola Game</div>
+                    <small>Lihat dan edit koleksi game</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 bg-success text-white text-center py-3 rounded-3">
+                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                <div class="h5 fw-bold mb-1">Laporan Penjualan</div>
+                <small>Analisis performa toko</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="text-decoration-none">
+                <div class="card border-0 bg-info text-white text-center py-3 rounded-3 hover-lift">
+                    <i class="fas fa-tachometer-alt fa-2x mb-2"></i>
+                    <div class="h5 fw-bold mb-1">Dashboard</div>
+                    <small>Overview lengkap</small>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+.border-bottom {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Hover effects for table rows */
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Animation for table rows */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table tbody tr {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+.table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+.table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+.table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+</style>
+
+<script>
+// Search functionality
+function searchOrders() {
+    const input = document.getElementById('searchOrders');
+    const filter = input.value.toLowerCase();
+    const table = document.querySelector('table tbody');
+    const rows = table.getElementsByClassName('order-row');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    }
+}
+
+// Initialize search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchOrders');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', searchOrders);
+    }
+    
+    // Add loading states for action buttons
+    const actionButtons = document.querySelectorAll('form button[type="submit"]');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Memproses...';
+            this.disabled = true;
+            
+            // Revert after 3 seconds (fallback)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 3000);
+        });
+    });
+    
+    // Auto-refresh pending orders count every 30 seconds
+    if (window.location.search.includes('pending')) {
+        setInterval(() => {
+            fetch(window.location.href)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newCount = doc.querySelector('.btn-group .btn.active .badge').textContent;
+                    const currentBadge = document.querySelector('.btn-group .btn.active .badge');
+                    if (currentBadge && currentBadge.textContent !== newCount) {
+                        currentBadge.textContent = newCount;
+                        showNotification('Data pesanan diperbarui', 'info');
+                    }
+                });
+        }, 30000); // 30 seconds
+    }
+});
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Quick filter by clicking on status badge
+document.addEventListener('DOMContentLoaded', function() {
+    const statusBadges = document.querySelectorAll('td .badge');
+    statusBadges.forEach(badge => {
+        badge.style.cursor = 'pointer';
+        badge.addEventListener('click', function() {
+            const status = this.textContent.toLowerCase();
+            let statusParam = 'all';
+            
+            if (status.includes('berhasil') || status.includes('paid')) {
+                statusParam = 'paid';
+            } else if (status.includes('menunggu') || status.includes('pending')) {
+                statusParam = 'pending';
+            } else if (status.includes('dibatalkan') || status.includes('cancelled')) {
+                statusParam = 'cancelled';
+            }
+            
+            window.location.href = `{{ url_for('admin.admin_orders') }}?status=${statusParam}`;
+        });
+    });
+});
+</script>
+{% endblock %}

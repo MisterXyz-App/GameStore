@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold text-white mb-2">
+                        <i class="fas fa-credit-card me-3"></i>{{ title }}
+                    </h1>
+                    <p class="text-muted lead">Kelola metode pembayaran toko game Anda</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.admin_payment_methods') }}" class="btn btn-outline-primary px-4 py-2 rounded-3">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <!-- Form Card -->
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-{{ 'edit' if payment_method else 'plus' }} me-2"></i>
+                        {{ 'Edit' if payment_method else 'Tambah' }} Metode Pembayaran
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.name.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.name(class="form-control rounded-3 py-2", placeholder="e.g., BCA Transfer, Gopay, etc.") }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.name.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.type.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.type(class="form-select rounded-3 py-2") }}
+                                    {% if form.type.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.type.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.account_number.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.account_number(class="form-control rounded-3 py-2", placeholder="e.g., 1234567890") }}
+                                    {% if form.account_number.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.account_number.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.account_name.label(class="form-label fw-semibold text-white") }}
+                                    {{ form.account_name(class="form-control rounded-3 py-2", placeholder="e.g., John Doe") }}
+                                    {% if form.account_name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.account_name.errors %}
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.qr_code_file.label(class="form-label fw-semibold text-white") }}
+                            {{ form.qr_code_file(class="form-control rounded-3 py-2") }}
+                            <div class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>Upload gambar QR code untuk memudahkan pembayaran (opsional)
+                            </div>
+                            {% if form.qr_code_file.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.qr_code_file.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if payment_method and payment_method.qr_code_url %}
+                            <div class="mt-3 p-3 bg-dark rounded-3">
+                                <strong class="text-white">QR Code Saat Ini:</strong>
+                                <div class="text-center mt-2">
+                                    <img src="{{ payment_method.qr_code_url }}" class="img-thumbnail border-primary" style="max-height: 200px; max-width: 200px;" alt="Current QR code">
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.instructions.label(class="form-label fw-semibold text-white") }}
+                            {{ form.instructions(class="form-control rounded-3", rows="4", placeholder="Instruksi khusus untuk pelanggan...") }}
+                            {% if form.instructions.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.instructions.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.is_active(class="form-check-input", style="transform: scale(1.3);") }}
+                                {{ form.is_active.label(class="form-check-label fw-semibold text-white") }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('admin.admin_payment_methods') }}" class="btn btn-outline-secondary me-md-2 px-4 py-2 rounded-3">
+                                <i class="fas fa-times me-2"></i>Batal
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold">
+                                <i class="fas fa-{{ 'save' if payment_method else 'plus' }} me-2"></i>
+                                {{ 'Update' if payment_method else 'Buat' }} Metode Pembayaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card border-0 shadow-lg rounded-3 mt-4">
+                <div class="card-header bg-gradient-info border-0 py-3">
+                    <h5 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-lightbulb me-2"></i>Tips & Informasi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted">Pastikan nomor rekening/akun sudah benar</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted">QR code membantu proses pembayaran pelanggan</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted">Nonaktifkan metode bayar yang tidak digunakan</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted">Berikan instruksi yang jelas untuk pelanggan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.form-control, .form-select {
+    border-radius: 0.75rem;
+    border: 1px solid #2d3748;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    color: white;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+}
+
+.form-label {
+    color: #e2e8f0 !important;
+}
+
+.form-text {
+    color: #a0aec0 !important;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 1.75rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading state to submit button
+    const submitButton = document.querySelector('button[type="submit"]');
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function() {
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+        submitButton.disabled = true;
+        
+        // Revert after 5 seconds (fallback)
+        setTimeout(() => {
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        }, 5000);
+    });
+    
+    // Add hover effects to form elements
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+});
+</script>
+{% endblock %}
