@@ -1,1 +1,437 @@
+{% extends "base.html" %}
 
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-4 fw-bold text-white mb-2">
+                        <i class="fas fa-tachometer-alt me-3"></i>Admin Dashboard
+                    </h1>
+                    <p class="text-muted lead">Overview lengkap toko game Anda</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ url_for('admin.admin_games') }}" class="btn btn-outline-primary px-4 py-2 rounded-3">
+                        <i class="fas fa-gamepad me-2"></i>Kelola Game
+                    </a>
+                    <a href="{{ url_for('admin.admin_orders') }}" class="btn btn-outline-primary px-4 py-2 rounded-3">
+                        <i class="fas fa-shopping-cart me-2"></i>Kelola Pesanan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Total Pendapatan</div>
+                            <div class="h3 fw-bold text-primary">Rp {{ "{:,.0f}".format(stats.total_revenue) }}</div>
+                            <div class="text-success small">
+                                <i class="fas fa-trend-up me-1"></i>Semua waktu
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-primary rounded-3 p-3">
+                                <i class="fas fa-dollar-sign fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Total Pesanan</div>
+                            <div class="h3 fw-bold text-success">{{ stats.total_orders }}</div>
+                            <div class="text-info small">
+                                <i class="fas fa-shopping-cart me-1"></i>Semua pesanan
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-success rounded-3 p-3">
+                                <i class="fas fa-shopping-cart fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Pesanan Tertunda</div>
+                            <div class="h3 fw-bold text-warning">{{ stats.pending_orders }}</div>
+                            <div class="text-warning small">
+                                <i class="fas fa-clock me-1"></i>Perlu verifikasi
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-warning rounded-3 p-3">
+                                <i class="fas fa-clock fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-lg rounded-3 h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted small fw-semibold text-uppercase mb-2">Peringatan Stok</div>
+                            <div class="h3 fw-bold text-danger">{{ stats.low_stock_games + stats.out_of_stock_games }}</div>
+                            <div class="text-danger small">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                {{ stats.low_stock_games }} rendah, {{ stats.out_of_stock_games }} habis
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="bg-gradient-danger rounded-3 p-3">
+                                <i class="fas fa-exclamation-triangle fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-primary border-0 py-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-white fw-bold">
+                            <i class="fas fa-history me-2"></i>Pesanan Terbaru
+                        </h4>
+                        <a href="{{ url_for('admin.admin_orders') }}" class="btn btn-light btn-sm rounded-3">
+                            <i class="fas fa-list me-1"></i>Lihat Semua
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-dark">
+                                <tr>
+                                    <th class="text-white border-0">ID Pesanan</th>
+                                    <th class="text-white border-0">Customer</th>
+                                    <th class="text-white border-0">Amount</th>
+                                    <th class="text-white border-0">Status</th>
+                                    <th class="text-white border-0">Tanggal</th>
+                                    <th class="text-white border-0">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr class="border-bottom">
+                                    <td class="fw-semibold">
+                                        <code>{{ order.id[:8] }}...</code>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle text-muted me-2"></i>
+                                            <span>{{ order.user.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold text-primary">Rp {{ "{:,.0f}".format(order.total_amount) }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if order.status == 'paid' %}success{% elif order.status == 'pending' %}warning{% else %}secondary{% endif %} rounded-pill py-2 px-3">
+                                            {{ order.status|title }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ order.created_at.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.admin_order_detail', order_id=order.id) }}" class="btn btn-outline-primary btn-sm rounded-3">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                        <h5 class="text-white">Belum Ada Pesanan</h5>
+                        <p class="text-muted">Pesanan akan muncul di sini ketika pelanggan melakukan pembelian.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-lg rounded-3 mb-4">
+                <div class="card-header bg-gradient-info border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-bolt me-2"></i>Aksi Cepat
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('admin.admin_add_game') }}" class="btn btn-success btn-lg py-3 rounded-3 fw-semibold">
+                            <i class="fas fa-plus me-2"></i>Tambah Game Baru
+                        </a>
+                        <a href="{{ url_for('admin.admin_add_payment_method') }}" class="btn btn-info btn-lg py-3 rounded-3 fw-semibold">
+                            <i class="fas fa-credit-card me-2"></i>Tambah Metode Bayar
+                        </a>
+                        <a href="{{ url_for('admin.admin_orders') }}?status=pending" class="btn btn-warning btn-lg py-3 rounded-3 fw-semibold">
+                            <i class="fas fa-clock me-2"></i>Lihat Pesanan Tertunda
+                        </a>
+                        <a href="{{ url_for('admin.admin_games') }}" class="btn btn-danger btn-lg py-3 rounded-3 fw-semibold">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Kelola Stok
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stock Alerts -->
+            <div class="card border-0 shadow-lg rounded-3">
+                <div class="card-header bg-gradient-warning border-0 py-4">
+                    <h4 class="mb-0 text-white fw-bold">
+                        <i class="fas fa-box me-2"></i>Peringatan Stok
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% set low_stock_games = games|selectattr('stock', 'le', 10)|selectattr('stock', 'gt', 0)|list %}
+                    {% set out_of_stock_games = games|selectattr('stock', 'le', 0)|list %}
+                    
+                    {% if low_stock_games or out_of_stock_games %}
+                        {% if out_of_stock_games %}
+                        <div class="mb-4">
+                            <h6 class="text-danger mb-3">
+                                <i class="fas fa-times-circle me-2"></i>Stok Habis:
+                            </h6>
+                            <div class="list-group list-group-flush">
+                                {% for game in out_of_stock_games[:3] %}
+                                <div class="list-group-item bg-transparent border-secondary px-0">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ game.image_url }}" alt="{{ game.title }}" 
+                                             class="rounded-2 me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-white mb-1">{{ game.title }}</h6>
+                                            <small class="text-danger">Stok: 0</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% if out_of_stock_games|length > 3 %}
+                                <div class="list-group-item bg-transparent border-secondary px-0 text-center">
+                                    <small class="text-muted">... dan {{ out_of_stock_games|length - 3 }} lainnya</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if low_stock_games %}
+                        <div class="mb-4">
+                            <h6 class="text-warning mb-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Stok Menipis:
+                            </h6>
+                            <div class="list-group list-group-flush">
+                                {% for game in low_stock_games[:3] %}
+                                <div class="list-group-item bg-transparent border-secondary px-0">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ game.image_url }}" alt="{{ game.title }}" 
+                                             class="rounded-2 me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-white mb-1">{{ game.title }}</h6>
+                                            <small class="text-warning">Stok: {{ game.stock }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% if low_stock_games|length > 3 %}
+                                <div class="list-group-item bg-transparent border-secondary px-0 text-center">
+                                    <small class="text-muted">... dan {{ low_stock_games|length - 3 }} lainnya</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('admin.admin_games') }}" class="btn btn-warning btn-lg w-100 py-3 rounded-3 fw-semibold">
+                            <i class="fas fa-cog me-2"></i>Kelola Semua Game
+                        </a>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5 class="text-white">Stok Optimal</h5>
+                            <p class="text-muted">Semua game memiliki stok yang cukup.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 1rem;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.list-group-item {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+    }
+}
+
+/* Animation for stats cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.col-xl-3, .col-md-6 {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.col-xl-3:nth-child(2), .col-md-6:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.col-xl-3:nth-child(3), .col-md-6:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.col-xl-3:nth-child(4), .col-md-6:nth-child(4) {
+    animation-delay: 0.3s;
+}
+</style>
+
+<script>
+// Add some interactivity
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click animations to cards
+    const cards = document.querySelectorAll('.hover-lift');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Auto-refresh dashboard every 30 seconds
+    setTimeout(() => {
+        window.location.reload();
+    }, 30000);
+    
+    // Add loading state to action buttons
+    const actionButtons = document.querySelectorAll('.card-body .btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            this.disabled = true;
+            
+            // Revert after 3 seconds (fallback)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 3000);
+        });
+    });
+});
+</script>
+{% endblock %}
